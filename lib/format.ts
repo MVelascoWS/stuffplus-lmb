@@ -30,6 +30,15 @@ export const TIPO_CON_DEMOSTRATIVO: Record<PitchType, string> = {
   Cutter: "este cutter",
 };
 
+export const TIPO_CON_ARTICULO: Record<PitchType, string> = {
+  "Four-Seam": "la recta de 4 costuras",
+  Sinker: "el sinker",
+  Slider: "el slider",
+  Changeup: "el cambio",
+  Curveball: "la curva",
+  Cutter: "el cutter",
+};
+
 export const MANO_LABEL = { Right: "Derecho", Left: "Zurdo" } as const;
 
 /** Nombre corto de cada sede para encabezados y ejes; el nombre completo viene de meta.json. */
