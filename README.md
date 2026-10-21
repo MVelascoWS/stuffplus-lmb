@@ -6,7 +6,7 @@ delgado, con un simulador para estimar cómo rinde cualquier lanzamiento en el E
 
 Proyecto para el reto **Diablos Rojos** del hackathon ISAC 2026.
 
-- **Dashboard:** [LINK DE VERCEL]
+- **Dashboard:** https://stuffplus-lmb.vercel.app
 - **Reporte técnico:** [`public/reporte.html`](public/reporte.html) (versión PDF: [`public/reporte.pdf`](public/reporte.pdf))
 - **Video de demostración:** [LINK DEL VIDEO]
 
