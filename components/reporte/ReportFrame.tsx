@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const SRC = "/reporte.html";
+// En el sitio exportado el reporte se publica en /reporte-tecnico/ (ver scripts/publicar-reporte.mjs);
+// en desarrollo se sirve directo desde public/.
+const SRC = process.env.NODE_ENV === "development" ? "/reporte.html" : "/reporte-tecnico/";
 
 /** Muestra el reporte técnico dentro del sitio, con la altura de su contenido para evitar un doble scroll. */
 export function ReportFrame() {

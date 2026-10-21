@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/publicar-reporte.mjs",
     "start": "next start",
     "lint": "eslint",
     "check": "tsx scripts/check-fixtures.ts"
