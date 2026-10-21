@@ -99,8 +99,7 @@ function SimulatorView({ data, source: initialSource, notFound }: {
         <div className="mb-6 flex flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
           <p className="text-neutral-700">
             Lanzamiento real: <span className="font-medium text-neutral-900">{source.pitcher_anon_id}</span> ·{" "}
-            {TIPO_LABEL[source.tipo]} · {fmt0(source.n)} lanzamientos medidos en{" "}
-            {SEDE_CORTA[source.measuredAt].toLowerCase()}.
+            {TIPO_LABEL[source.tipo]} · {fmt0(source.n)} lanzamientos · medido en: {SEDE_CORTA[source.measuredAt]}
           </p>
           <div className="flex shrink-0 gap-3">
             <Link href={`/pitchers/?p=${source.pitcher_anon_id}`} className="text-accent underline-offset-2 hover:underline">
