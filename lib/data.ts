@@ -54,10 +54,10 @@ export interface Pitcher {
   n: number;
   stuff: number;
   rv100: number;
-  stuff_mar: number | null; n_mar: number;
-  stuff_media: number | null; n_media: number;
-  stuff_extrema: number | null; n_extrema: number;
-  stuff_cdmx_proy: number | null; n_proy: number;
+  stuff_mar: number | null; n_mar: number | null;
+  stuff_media: number | null; n_media: number | null;
+  stuff_extrema: number | null; n_extrema: number | null;
+  stuff_cdmx_proy: number | null; n_proy: number | null;
   delta_cdmx_proy: number | null;
 }
 
