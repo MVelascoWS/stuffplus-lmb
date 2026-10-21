@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Paleta sobria: fondo claro, grises neutros y un solo acento rojo. */
+@theme {
+  --color-accent: #b91c1c;
+  --color-accent-soft: #fef2f2;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  /* Colores de las gráficas (Recharts recibe valores, no clases). */
+  --chart-main: #b91c1c;
+  --chart-ref: #a8a29e;
+  --chart-grid: #e5e5e5;
+}
+
+html {
+  background: #fafafa;
+}
+
+body {
+  background: #fafafa;
+  color: #171717;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+input[type="range"] {
+  accent-color: var(--color-accent);
+}
