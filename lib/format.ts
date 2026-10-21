@@ -20,6 +20,16 @@ export const TIPO_CORTO: Record<PitchType, string> = {
   Cutter: "Cutter",
 };
 
+/** "esta recta", "este slider": para frases generadas a partir del tipo. */
+export const TIPO_CON_DEMOSTRATIVO: Record<PitchType, string> = {
+  "Four-Seam": "esta recta de 4 costuras",
+  Sinker: "este sinker",
+  Slider: "este slider",
+  Changeup: "este cambio",
+  Curveball: "esta curva",
+  Cutter: "este cutter",
+};
+
 export const MANO_LABEL = { Right: "Derecho", Left: "Zurdo" } as const;
 
 /** Nombre corto de cada sede para encabezados y ejes; el nombre completo viene de meta.json. */
