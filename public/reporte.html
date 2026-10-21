@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stuff+ calibrado por altitud · Reporte técnico</title>
+<style>
+  :root { --ink:#1c1917; --muted:#57534e; --line:#e7e5e4; --soft:#f5f5f4; --accent:#b91c1c; --accent-soft:#fee2e2; --good:#15803d; --bar:#a8a29e; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:var(--ink); font:16px/1.6 Georgia, "Iowan Old Style", "Times New Roman", serif; }
+  main { max-width: 820px; margin: 0 auto; padding: 48px 20px 80px; }
+  h1, h2, h3, .sans, table, .kpi, .bars, figcaption, .note { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+  h2 { font-size: 1.35rem; margin: 48px 0 12px; padding-top: 12px; border-top: 2px solid var(--ink); }
+  h3 { font-size: 1.05rem; margin: 28px 0 8px; }
+  .sub { color: var(--muted); font-family: system-ui, sans-serif; font-size: .95rem; }
+  .lead { font-size: 1.15rem; }
+  .box { background: var(--soft); border-left: 4px solid var(--accent); padding: 16px 20px; margin: 20px 0; }
+  .box p { margin: .4em 0; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 24px 0; }
+  .kpi { border: 1px solid var(--line); padding: 14px; border-radius: 6px; }
+  .kpi b { display: block; font-size: 1.7rem; color: var(--accent); line-height: 1.1; }
+  .kpi span { font-size: .85rem; color: var(--muted); }
+  .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; min-width: 0; border-collapse: collapse; font-size: .88rem; margin: 12px 0 8px; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; background: var(--soft); }
+  td.l, th.l { text-align: left; }
+  .pos { color: var(--good); font-weight: 600; } .neg { color: var(--accent); font-weight: 600; }
+  figure { margin: 20px 0; } figcaption { font-size: .85rem; color: var(--muted); margin-top: 6px; }
+  .bars { display: grid; grid-template-columns: 90px 1fr 56px; gap: 6px 10px; align-items: center; font-size: .85rem; }
+  .track { position: relative; height: 18px; background: var(--soft); }
+  .fill { position: absolute; top: 0; height: 100%; }
+  .fill.obs { background: var(--accent); } .fill.lin { background: transparent; border-right: 2px dashed var(--ink); }
+  .fill.a { background: var(--accent); } .fill.b { background: var(--bar); }
+  .legend { font-size: .8rem; color: var(--muted); margin-top: 8px; font-family: system-ui, sans-serif; }
+  .legend i { display: inline-block; width: 12px; height: 12px; vertical-align: -2px; margin: 0 4px 0 12px; }
+  ol.steps li, ul li { margin: .35em 0; }
+  .note { font-size: .82rem; color: var(--muted); }
+  code { font-size: .88em; background: var(--soft); padding: 1px 4px; border-radius: 3px; }
+  .rec { border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; margin: 12px 0; }
+  .rec h3 { margin-top: 0; }
+  .tag { display: inline-block; font: 600 .72rem system-ui, sans-serif; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); }
+  @media (max-width: 560px) {
+    main { padding: 28px 16px 60px; } h1 { font-size: 1.5rem; }
+    table { font-size: .78rem; } th, td { padding: 5px 5px; }
+    .bars { grid-template-columns: 74px 1fr 48px; font-size: .78rem; }
+  }
+  @media print {
+    main { padding: 0; max-width: none; } body { font-size: 9.5pt; line-height: 1.45; }
+    h2 { margin-top: 22px; break-after: avoid; } h3 { break-after: avoid; }
+    .kpi b { font-size: 1.3rem; } table { font-size: 8pt; } .tw { overflow: visible; }
+    .rec, figure, table, .box { break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<p class="tag">ISAC 2026 · Reto Diablos Rojos · Reporte técnico</p>
+<h1>Stuff+ calibrado por altitud para la Liga Mexicana de Béisbol</h1>
+<p class="sub">[EQUIPO: nombres de los integrantes] · Datos Trackman LMB 2024–2026 provistos por Diablos Rojos (pitchers anónimos)</p>
+
+<div class="box">
+<p class="lead"><b>En una frase:</b> en la Ciudad de México el aire delgado le quita en promedio una cuarta parte del movimiento a cada lanzamiento, pero no a todos por igual. Construimos una métrica de calidad de pitcheo (Stuff+) que entiende esa física, y con ella identificamos qué tipo de pitcher y qué tipo de lanzamiento rinde mejor en el Estadio Alfredo Harp Helú.</p>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><b>627,054</b><span>lanzamientos de 1,039 pitchers en 2,116 juegos</span></div>
+  <div class="kpi"><b>−25%</b><span>movimiento perdido en altitud extrema vs. sedes a nivel del mar</span></div>
+  <div class="kpi"><b>2.3×</b><span>mejor que el resultado real para predecir el rendimiento con solo 25 lanzamientos</span></div>
+  <div class="kpi"><b>0.88</b><span>estabilidad del Stuff+ de un mismo lanzamiento de una temporada a la siguiente</span></div>
+</div>
+
+<h2 class="keep">1. Resumen para la toma de decisiones</h2>
+<p><b>Qué es Stuff+.</b> Una calificación de qué tan difícil de batear es un lanzamiento solo por cómo sale de la mano y cómo se mueve: velocidad, giro, movimiento, punto de liberación y cómo se combina con la recta del mismo pitcher. No mira dónde cayó el lanzamiento ni qué pasó en la jugada. 100 es el promedio de la liga en ese tipo de sede; 110 es una desviación estándar arriba (muy bueno); 90, una abajo.</p>
+<p><b>Por qué importa la altitud.</b> La pelota se curva porque su giro empuja el aire. Arriba de 1,800 metros hay menos aire que empujar, y la pelota pierde movimiento. Medimos que lo pierde <b>más de lo que la densidad sola explica</b>: la fuerza que curva la pelota cae como la densidad elevada a la 1.5. Ese hallazgo se predijo en las sedes de altitud extrema y se confirmó, sin reajustar nada, en las de altitud media.</p>
+<p><b>Qué cambia para Diablos.</b> Como Stuff+ compara contra los lanzamientos que se tiran en el mismo tipo de sede, la pregunta útil no es "¿quién pierde movimiento?" (todos) sino "¿quién pierde menos que los demás?". La respuesta, consistente entre la proyección física y lo observado en los datos:</p>
+<ul>
+  <li><b>Pierden terreno en la CDMX:</b> las rectas de cuatro costuras cuyo valor depende del "ride" (movimiento vertical inducido).</li>
+  <li><b>Ganan terreno:</b> sliders y cutters, especialmente si son duros y con giro alto.</li>
+  <li><b>Changeup:</b> pierde más movimiento que ningún otro lanzamiento, pero su recta pierde también; lo que importa es la diferencia entre ambos, y ahí resiste.</li>
+</ul>
+<p><b>Cómo usarlo.</b> Para firmar o reforzar, ordenar candidatos por su <b>Stuff+ proyectado en el Harp Helú</b>, no por sus números a nivel del mar. Para evaluar a un pitcher nuevo, confiar en Stuff+ desde los primeros 25–50 lanzamientos, mucho antes de que sus resultados signifiquen algo.</p>
+
+<h2>2. Cómo se construyó la métrica</h2>
+
+<h3>2.1 Qué intenta predecir: valor de carrera de cada lanzamiento</h3>
+<p>Cada lanzamiento mueve el conteo o termina el turno. Cada conteo tiene un valor en carreras esperadas (un 3-0 favorece al bateador; un 0-2 al pitcher). El valor de un lanzamiento es cuánto cambió esa expectativa. Lo construimos con los datos de la propia LMB, sin tomar tablas prestadas de otras ligas:</p>
+<ol class="steps">
+  <li><b>Pesos de los eventos finales</b> (out, ponche, base por bolas, sencillo, doble, triple, jonrón) en la escala estándar, ajustados al ambiente ofensivo de la LMB: 0.145 carreras por turno contra 0.117 en Grandes Ligas (factor 1.24).</li>
+  <li><b>Bolas en juego sin suerte.</b> En lugar del resultado real de cada batazo (que depende de dónde estaba el fildeador), usamos el valor esperado dada su velocidad de salida, su ángulo y la categoría de altitud. Así, un batazo de 105 mph atrapado contra la barda cuenta como lo que fue: un batazo peligroso. Esto también captura que en altitud el mismo contacto vale más: un batazo promedio vale +0.07 carreras a nivel del mar y +0.13 en altitud extrema.</li>
+  <li><b>Valor de cada conteo,</b> resolviendo la cadena de transiciones entre los 12 conteos con las probabilidades observadas en la LMB.</li>
+</ol>
+<div class="tw"><table>
+  <tr><th>Valor del conteo (carreras)</th><th>0 strikes</th><th>1 strike</th><th>2 strikes</th></tr>
+  <tr><td>0 bolas</td><td>0.051</td><td>−0.002</td><td>−0.085</td></tr>
+  <tr><td>1 bola</td><td>0.093</td><td>0.031</td><td>−0.060</td></tr>
+  <tr><td>2 bolas</td><td>0.158</td><td>0.085</td><td>−0.013</td></tr>
+  <tr><td>3 bolas</td><td>0.266</td><td>0.195</td><td>0.095</td></tr>
+</table></div>
+<p class="note">Valores relativos al turno promedio; positivo favorece al bateador. Un strike vale en promedio −0.114 carreras y una bola +0.066.</p>
+
+<h3>2.2 Qué ve el modelo (y qué no ve, a propósito)</h3>
+<div class="tw"><table>
+  <tr><th class="l">Ve</th><th class="l">Por qué</th></tr>
+  <tr><td>Velocidad, giro (rpm) y eje de giro</td><td class="l">Lo que pone la mano del pitcher</td></tr>
+  <tr><td>Movimiento vertical inducido (IVB) y horizontal (HB)</td><td class="l">Lo que hace la pelota en el aire</td></tr>
+  <tr><td>Extensión, altura y lado de liberación</td><td class="l">Desde dónde la ve venir el bateador</td></tr>
+  <tr><td>Diferencias contra la recta del mismo pitcher (velocidad, IVB, HB, eje)</td><td class="l">Un changeup vale por lo distinto que es de la recta, no por sí solo</td></tr>
+  <tr><td>Categoría de altitud</td><td class="l">El mismo lanzamiento puede valer distinto donde la pelota vuela más</td></tr>
+  <tr><th class="l">No ve</th><th class="l"></th></tr>
+  <tr><td>Ubicación, conteo, bateador</td><td class="l">Eso es comando y contexto, no "stuff" (corresponde a Location+)</td></tr>
+  <tr><td>Etiqueta de tipo de lanzamiento</td><td class="l">Está contaminada por la altitud (ver sección 3.2); el modelo aprende de la física</td></tr>
+</table></div>
+<p>Para zurdos, todo lo horizontal se expresa "hacia el lado del brazo", de modo que diestros y zurdos comparten la misma escala. Las diferencias contra la recta se calculan dentro de la misma temporada y la misma categoría de altitud: el bateador ve ambos lanzamientos en el mismo aire.</p>
+
+<h3>2.3 Modelo y escala</h3>
+<p>Un modelo de árboles de decisión potenciados (LightGBM, 500 árboles) predice el valor de carrera esperado de cada lanzamiento. Stuff+ convierte esa predicción a una escala intuitiva <b>dentro de cada categoría de altitud</b> (sin altitud, media, extrema), como pidió Diablos al calcular el 100 por estadio:</p>
+<p style="text-align:center"><code>Stuff+ = 100 + 10 × (promedio de la sede − valor predicho) / desviación estándar de la sede</code></p>
+<p>Al no haber identificador de estadio en los datos, la categoría de altitud es la unidad de comparación más fina disponible. La desviación estándar se toma de los promedios por pitcher y lanzamiento (con al menos 100 lanzamientos), así 110 significa "una desviación estándar mejor que el lanzamiento típico de la liga en ese tipo de sede".</p>
+
+<h3>2.4 Validación</h3>
+<p>Todas las pruebas se hacen con pitchers o temporadas que el modelo no vio al entrenar. Medimos qué tan bien el Stuff+ promedio de cada pitcher en cada lanzamiento ordena su valor de carrera real.</p>
+<p><b>Escalera de modelos</b> (pitchers no vistos, 326 combinaciones pitcher × lanzamiento):</p>
+<figure>
+<div class="bars">
+  <span>Velocidad</span><div class="track"><div class="fill a" style="width:42.5%"></div></div><span>0.18</span>
+  <span>+ movimiento y giro</span><div class="track"><div class="fill a" style="width:79.3%"></div></div><span>0.34</span>
+  <span>+ liberación y arsenal</span><div class="track"><div class="fill a" style="width:100%"></div></div><span>0.43</span>
+  <span>+ altitud (final)</span><div class="track"><div class="fill a" style="width:96.2%"></div></div><span>0.41</span>
+</div>
+<figcaption>Correlación entre Stuff+ predicho y valor de carrera real. Cada capa de información sobre la forma del lanzamiento mejora la métrica; las diferencias contra la recta aportan casi tanto como el movimiento. La altitud no mejora el ordenamiento de pitchers dentro de la liga (−0.02) pero se conserva porque permite al modelo valorar distinto la misma forma según la sede, que es lo que necesita el simulador.</figcaption>
+</figure>
+<div class="tw"><table>
+  <tr><th class="l">Prueba</th><th>Resultado</th></tr>
+  <tr><td class="l">Fuera de muestra, 5 grupos de pitchers (1,769 pitcher × lanzamiento)</td><td>0.41</td></tr>
+  <tr><td class="l">Temporal: entrenado 2024–2025, evaluado en 2026</td><td>0.46</td></tr>
+  <tr><td class="l">Temporal, solo pitchers que debutaron en 2026</td><td>0.42</td></tr>
+  <tr><td class="l">Estabilidad año contra año, 2024→2025 / 2025→2026</td><td>0.88 / 0.87</td></tr>
+  <tr><td class="l">Estabilidad del valor de carrera real, mismos pares</td><td>0.35 / 0.37</td></tr>
+</table></div>
+<p><b>La prueba que más importa: ¿cuándo conviene creerle a Stuff+?</b> Tomamos una muestra de N lanzamientos de un pitcher y medimos qué tan bien predice el resultado del resto de su temporada:</p>
+<figure>
+<div class="bars">
+  <span>25 lanz.</span><div class="track"><div class="fill a" style="width:97.6%"></div></div><span>0.37</span>
+  <span></span><div class="track"><div class="fill b" style="width:42.8%"></div></div><span>0.16</span>
+  <span>50 lanz.</span><div class="track"><div class="fill a" style="width:92.7%"></div></div><span>0.35</span>
+  <span></span><div class="track"><div class="fill b" style="width:79.2%"></div></div><span>0.30</span>
+  <span>100 lanz.</span><div class="track"><div class="fill a" style="width:95.3%"></div></div><span>0.36</span>
+  <span></span><div class="track"><div class="fill b" style="width:88.4%"></div></div><span>0.34</span>
+  <span>200 lanz.</span><div class="track"><div class="fill a" style="width:81.9%"></div></div><span>0.31</span>
+  <span></span><div class="track"><div class="fill b" style="width:100%"></div></div><span>0.38</span>
+</div>
+<div class="legend"><i style="background:var(--accent)"></i>Stuff+<i style="background:var(--bar)"></i>Resultado real (valor de carrera)</div>
+<figcaption>Con 25 lanzamientos, Stuff+ anticipa el rendimiento 2.3 veces mejor que los resultados. Hacia los 150–200 lanzamientos el resultado real lo alcanza, porque incorpora el comando, que Stuff+ ignora por diseño. Por eso Stuff+ es la herramienta para decidir rápido (refuerzos, importados, prospectos) y se complementa con los resultados cuando la muestra crece.</figcaption>
+</figure>
+<p class="note">Sobre la precisión por lanzamiento: el modelo reduce el error cuadrático de cada lanzamiento individual en 0.3%. Es lo esperado: el resultado de un solo lanzamiento es casi todo ruido (ubicación, bateador, azar). La señal aparece al agregar, como muestran las correlaciones.</p>
+
+<h2>3. La capa física: por qué y cuánto pierde movimiento la pelota</h2>
+
+<h3>3.1 El efecto, medido con el mismo pitcher</h3>
+<p>Comparamos a cada pitcher contra sí mismo: el mismo lanzamiento en sedes de altitud extrema contra sedes a nivel del mar. Así se descarta que la diferencia venga de que distintos pitchers lanzan en distintos lugares.</p>
+<figure>
+<div class="bars">
+  <span>Changeup</span><div class="track"><div class="fill obs" style="width:95.9%"></div><div class="fill lin" style="width:51.3%"></div></div><span>−30.7%</span>
+  <span>Curveball</span><div class="track"><div class="fill obs" style="width:89.4%"></div><div class="fill lin" style="width:51.3%"></div></div><span>−28.6%</span>
+  <span>Sinker</span><div class="track"><div class="fill obs" style="width:81.6%"></div><div class="fill lin" style="width:51.3%"></div></div><span>−26.1%</span>
+  <span>Four-Seam</span><div class="track"><div class="fill obs" style="width:77.5%"></div><div class="fill lin" style="width:51.3%"></div></div><span>−24.8%</span>
+  <span>Cutter</span><div class="track"><div class="fill obs" style="width:69.7%"></div><div class="fill lin" style="width:51.3%"></div></div><span>−22.3%</span>
+  <span>Slider</span><div class="track"><div class="fill obs" style="width:68.8%"></div><div class="fill lin" style="width:51.3%"></div></div><span>−22.0%</span>
+</div>
+<div class="legend"><i style="background:var(--accent)"></i>Pérdida observada de movimiento total<i style="border-right:2px dashed var(--ink);width:8px"></i>Predicción si el efecto fuera proporcional a la densidad (−16.4%)</div>
+<figcaption>Altitud extrema (promedio 1,968 m) contra sin altitud (promedio 151 m), mismo pitcher y mismo lanzamiento, tipo definido por la mano (ver 3.2).</figcaption>
+</figure>
+
+<h3>3.2 Tres verificaciones antes de creerle al número</h3>
+<ol class="steps">
+  <li><b>El sensor está bien calibrado.</b> Las variables que pone la mano no deberían cambiar con la altitud, y no cambian: velocidad +0.14 mph, extensión +0.07 pies, altura de liberación +0.01 pies, giro +10 rpm. La pérdida de movimiento no es un artefacto de medición.</li>
+  <li><b>La etiqueta de tipo de lanzamiento está contaminada.</b> El clasificador automático decide el tipo con base en el movimiento, que es justo lo que la altitud cambia: una recta que pierde "ride" puede terminar etiquetada como cutter. Reclasificamos cada lanzamiento usando solo lo que el aire no toca (velocidad, giro y eje), con fronteras aprendidas a nivel del mar. La discrepancia con la etiqueta original sube de 17.8% a nivel del mar a 25.1% en altitud extrema. Corregirla no reduce el efecto, lo aumenta (de −23.8% a −25.5%): la etiqueta original estaba sacando de "recta" justo a las rectas que más movimiento perdieron.</li>
+  <li><b>El tiempo de vuelo no lo explica.</b> Con menos arrastre la pelota llega antes (−0.65% de tiempo) pero más rápido, y la fuerza que la curva crece con el cuadrado de la velocidad. Un simulador de trayectoria muestra que ambos efectos se cancelan: el movimiento cambia −0.01%. Descartamos esta hipótesis.</li>
+</ol>
+
+<h3>3.3 La ley que sí lo explica, validada fuera de muestra</h3>
+<p>Separamos la aceleración que mide Trackman en dos componentes: la que frena la pelota (arrastre) y la que la curva (fuerza de Magnus). Con física de libro, ambas deberían caer en proporción a la densidad del aire. En los datos de la LMB:</p>
+<ul>
+  <li>La fuerza que curva la pelota cae como <b>densidad<sup>1.50</sup></b>: en aire delgado la pelota "muerde" menos el aire de lo que la densidad sola predice.</li>
+  <li>El arrastre cae como densidad<sup>0.81</sup>, menos de lo esperado.</li>
+</ul>
+<p>Estimamos el exponente por tipo de lanzamiento usando solo las sedes de altitud extrema y, sin reajustar nada, predijimos lo que pasaría en las de altitud media:</p>
+<div class="tw"><table>
+  <tr><th class="l">Lanzamiento</th><th>Exponente</th><th>IC 95%</th><th>Predicción altitud media</th><th>Observado</th><th>¿Valida?</th></tr>
+  <tr><td>Changeup</td><td>1.96</td><td>1.85 – 2.07</td><td>−22.1%</td><td>−23.1%</td><td class="pos">sí</td></tr>
+  <tr><td>Curveball</td><td>1.75</td><td>1.62 – 1.89</td><td>−20.0%</td><td>−17.7%</td><td class="neg">no</td></tr>
+  <tr><td>Sinker</td><td>1.55</td><td>1.49 – 1.60</td><td>−17.9%</td><td>−17.5%</td><td class="pos">sí</td></tr>
+  <tr><td>Four-Seam</td><td>1.44</td><td>1.39 – 1.48</td><td>−16.7%</td><td>−17.1%</td><td class="pos">sí</td></tr>
+  <tr><td>Cutter</td><td>1.25</td><td>1.04 – 1.44</td><td>−14.7%</td><td>−16.0%</td><td class="pos">sí</td></tr>
+  <tr><td>Slider</td><td>1.24</td><td>1.14 – 1.36</td><td>−14.7%</td><td>−14.9%</td><td class="pos">sí</td></tr>
+</table></div>
+<p>Cinco de seis tipos predicen la otra altitud dentro de su intervalo de confianza. La densidad del aire sola explica 64% de la pérdida de movimiento; con los coeficientes ajustados, el modelo físico explica 91%, en ambas altitudes. El orden de los exponentes es consistente con una hipótesis física razonable, aunque no la probamos: los lanzamientos cuyo movimiento depende más de la interacción de la costura con el aire (changeup, sinker) serían los más sensibles, y los que dependen más de velocidad y giro con componente "de bala" (slider, cutter), los menos.</p>
+
+<h3>3.4 El puente entre la física y el modelo</h3>
+<p>El simulador toma un lanzamiento medido en cualquier sede, lo lleva a nivel del mar con la ley validada, lo traslada a cada sede reduciendo su movimiento inducido (y el de la recta del mismo pitcher) y lo vuelve a calificar con el modelo en ese contexto. Para que el resultado no dependa de un umbral arbitrario del modelo, la calificación se promedia sobre la variación natural de ejecución de un pitcher (±0.6 mph y ±1.2 pulgadas de movimiento): nadie tira dos lanzamientos idénticos.</p>
+<p><b>La proyección física coincide con lo observado.</b> Trasladamos todos los lanzamientos tirados a nivel del mar al Harp Helú y medimos cuánto cambia su Stuff+ relativo. Lo comparamos con lo que efectivamente pasó a los mismos pitchers en sedes de altitud extrema:</p>
+<div class="tw"><table>
+  <tr><th class="l">Lanzamiento</th><th>Δ Stuff+ proyectado al Harp Helú</th><th>Δ Stuff+ observado en altitud extrema</th><th>Pitchers (observado)</th></tr>
+  <tr><td>Cutter</td><td class="pos">+7.8</td><td class="pos">+8.0</td><td>15</td></tr>
+  <tr><td>Slider</td><td class="pos">+4.2</td><td class="pos">+3.8</td><td>180</td></tr>
+  <tr><td>Curveball</td><td class="pos">+1.7</td><td>−0.1</td><td>43</td></tr>
+  <tr><td>Changeup</td><td>−0.5</td><td class="pos">+1.2</td><td>88</td></tr>
+  <tr><td>Sinker</td><td>−0.7</td><td class="neg">−1.9</td><td>126</td></tr>
+  <tr><td>Four-Seam</td><td class="neg">−3.9</td><td class="neg">−2.2</td><td>268</td></tr>
+</table></div>
+<p>En los cuatro lanzamientos con efecto claro (cutter, slider, sinker y recta), la proyección y la observación coinciden en dirección y magnitud. Curveball y changeup quedan cerca de cero en ambas mediciones.</p>
+
+<h2>4. Perfil físico ideal para el Harp Helú</h2>
+<p>Para cada lanzamiento comparamos el cuartil superior de Stuff+ contra el promedio, en sedes de altitud extrema y a nivel del mar. Lo que importa es <b>qué separa a los mejores en altitud</b> y <b>en qué difiere de lo que los separa a nivel del mar</b>. Todos los valores están medidos en la sede correspondiente (en altitud, el movimiento ya viene reducido).</p>
+<div class="tw"><table>
+  <tr><th class="l">Lanzamiento</th><th class="l">Lo que distingue a los mejores en altitud extrema</th><th class="l">Diferencia contra nivel del mar</th></tr>
+  <tr><td>Four-Seam</td><td class="l">Velocidad (93.4 vs. 92.0 mph), "ride" (14.4 vs. 13.1 in de IVB), giro alto (2,380 rpm), poco corrimiento al brazo</td><td class="l">El "ride" sigue importando, pero una recta de 14 in en la CDMX equivale a ~19 in a nivel del mar. La velocidad pesa un poco más.</td></tr>
+  <tr><td>Sinker</td><td class="l">Velocidad (92.9 vs. 91.4 mph), giro alto, hundimiento (IVB 7.2 vs. 8.0)</td><td class="l">La ventaja de velocidad de los mejores es el doble que a nivel del mar (+1.5 vs. +0.7 mph): el corrimiento se pierde, la velocidad no.</td></tr>
+  <tr><td>Slider</td><td class="l">Duro (84.9 vs. 83.9 mph), giro alto (2,570 rpm), sin elevación (IVB 0.8), barrido moderado</td><td class="l">A nivel del mar ganan los sliders de mucho barrido (−8.7 in); en altitud el barrido se recorta y gana la velocidad. Los mejores sliders de altitud son más rápidos que el promedio; los de nivel del mar, más lentos.</td></tr>
+  <tr><td>Changeup</td><td class="l">Profundidad (IVB 2.4 vs. 4.9), diferencial grande con la recta (−8.4 vs. −7.3 mph), giro bajo (1,650 rpm)</td><td class="l">En altitud lo que separa a los mejores es la caída: su ventaja en profundidad es de 2.5 in contra 0.7 in a nivel del mar. El diferencial de velocidad importa en ambas sedes.</td></tr>
+  <tr><td>Curveball</td><td class="l">Dura (80.6 vs. 77.8 mph), giro alto (2,630 rpm)</td><td class="l">La velocidad separa más en altitud (+2.8 vs. +2.0 mph).</td></tr>
+  <tr><td>Cutter</td><td class="l">Giro alto (2,500 rpm), corte al lado del guante (−2.2 in), velocidad</td><td class="l">Mismo perfil; es el lanzamiento que más terreno relativo gana en altitud.</td></tr>
+</table></div>
+<div class="box">
+<p><b>El pitcher ideal para la CDMX, en una línea:</b> velocidad en todo el repertorio, un slider o cutter duro y de giro alto como arma principal, un changeup que caiga (no que corra) con 8 mph o más de diferencia con su recta, y cuidado con rectas cuyo único valor es el "ride".</p>
+</div>
+
+<h2>5. Recomendaciones</h2>
+<div class="rec"><span class="tag">Adquisición</span>
+<h3>Ordenar candidatos por su Stuff+ proyectado en el Harp Helú</h3>
+<p>El tablero de pitchers incluye, para 601 lanzadores con al menos 300 lanzamientos, su Stuff+ a nivel del mar, su Stuff+ proyectado en la CDMX y la diferencia. Hay pitchers promedio a nivel del mar que se proyectan claramente arriba del promedio en la CDMX (por ejemplo, de 91 a 105) y estrellas de nivel del mar que se proyectan a la baja. El simulador permite hacer el mismo ejercicio con cualquier candidato del que se tengan datos de Trackman, de cualquier liga.</p></div>
+<div class="rec"><span class="tag">Plan de juego en casa</span>
+<h3>Apoyarse más en slider y cutter en el Harp Helú</h3>
+<p>Para pitchers que ya los tienen, su valor relativo sube en casa (+4 y +8 puntos, confirmado por lo observado). Las rectas de cuatro costuras pierden 2 a 4 puntos relativos: no dejan de servir, pero conviene no depender de ellas como lanzamiento de definición.</p></div>
+<div class="rec"><span class="tag">Desarrollo</span>
+<h3>En altitud, un slider más duro vale más que un slider con más barrido; un changeup con más caída vale más que uno con más corrimiento</h3>
+<p>Es la diferencia más clara entre el perfil ganador en altitud y a nivel del mar. Los objetivos de desarrollo para pitchers que lanzarán la mitad de sus juegos en la CDMX deberían reflejarlo.</p></div>
+<div class="rec"><span class="tag">Evaluación temprana</span>
+<h3>Usar Stuff+ desde los primeros 25 a 50 lanzamientos</h3>
+<p>Para refuerzos, importados y prospectos, Stuff+ es la mejor señal disponible antes de que los resultados se estabilicen. Pasados los 150–200 lanzamientos, combinarlo con los resultados (que ya incorporan comando).</p></div>
+<div class="rec"><span class="tag">Lectura de datos</span>
+<h3>Nunca comparar movimiento crudo entre sedes</h3>
+<p>Una recta con 14 pulgadas de movimiento vertical medida en la CDMX equivale a unas 19 a nivel del mar. Un reporte de scouting que compara pulgadas entre sedes subestima sistemáticamente a los pitchers de altitud y sobrestima a los de costa. El simulador hace la conversión en ambos sentidos.</p></div>
+
+<h2>6. Limitaciones y qué haríamos con más tiempo</h2>
+<ul>
+  <li><b>El Harp Helú no se puede aislar.</b> Sin identificador de estadio, la CDMX está mezclada con León, Durango, Puebla, Aguascalientes y Querétaro. La ley física se validó entre 151 y 1,968 m; aplicarla a 2,240 m es una extrapolación de 270 m. Con el identificador de sede se podría calibrar el estadio directamente.</li>
+  <li><b>Sin fecha ni clima.</b> La densidad del aire cambia varios puntos entre un juego frío y uno caluroso a la misma altitud. Con fecha o temperatura, la altitud entraría al modelo como densidad calculada por juego en lugar de categoría.</li>
+  <li><b>¿Por qué la pelota "muerde" menos el aire?</b> El exponente de 1.5 es consistente con efectos de la capa límite (número de Reynolds, interacción de la costura) y con pelotas que se resecan en altitud (el motivo del humidificador de Denver). Separarlos requiere datos de humedad o de almacenamiento de pelotas.</li>
+  <li><b>La curva no validó</b> fuera de muestra (error de 2.3 puntos); su proyección se reporta con cautela.</li>
+  <li><b>Un solo objetivo.</b> Modelar por separado la probabilidad de swing, de fallo y la calidad del contacto reduciría el ruido y permitiría explicar <i>por qué</i> un lanzamiento es bueno (genera fallos vs. contacto débil).</li>
+  <li><b>Pesos de eventos escalados.</b> Sin corredores en base en los datos, los pesos de eventos se escalaron desde la tabla estándar al ambiente de la LMB en lugar de calcularse desde cero.</li>
+  <li><b>Location+ y Pitching+.</b> La misma infraestructura (objetivo, escala, validación) permite agregar la ubicación para Location+ y combinar ambos en Pitching+.</li>
+  <li><b>Muestras chicas.</b> Un ajuste bayesiano que acerque al promedio a los pitchers con pocos lanzamientos estabilizaría aún más el ranking.</li>
+</ul>
+
+<h2>Apéndice: datos y reproducibilidad</h2>
+<p>Datos Trackman de la LMB 2024–2026 provistos por Diablos Rojos: 635,002 lanzamientos; 627,054 tras depurar registros sin mano de lanzar, sin categoría de altitud o con datos de seguimiento incompletos (1.3%). Pitchers, bateadores y juegos anónimos. Las altitudes promedio por categoría (151, 1,454 y 1,968 m) se calcularon con la tabla de sedes provista por Diablos.</p>
+<p>Pipeline en Python (pandas, LightGBM): construcción del objetivo, variables, modelo y validación, verificación física sin etiquetas y simulador de trayectoria. El dashboard evalúa el mismo modelo en el navegador; su implementación se verificó contra Python con una diferencia máxima de 0.0005 puntos de Stuff+.</p>
+<p class="note">Densidad del aire: Atmósfera Estándar Internacional. Exponentes con intervalos de confianza por remuestreo (2,000 repeticiones) sobre pares pitcher × lanzamiento con al menos 30 lanzamientos en cada sede.</p>
+
+</main>
+</body>
+</html>

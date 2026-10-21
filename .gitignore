@@ -1,0 +1,24 @@
+# dependencias y build
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# dataset original (confidencial, no se publica)
+data/
+*.parquet
+*.pkl
+*.rds
+
+# artefactos intermedios del pipeline
+pipeline/*.txt
+pipeline/*.json
+!pipeline/exponentes.json
+pipeline/*.mjs
+pipeline/__pycache__/
+
+# local
+.env*
+.DS_Store

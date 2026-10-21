@@ -1,0 +1,77 @@
+[
+ {
+  "input": {
+   "tipo": "Four-Seam",
+   "RelSpeed": 92.15,
+   "ivb": 17.09,
+   "hb_arm": 9.84,
+   "SpinRate": 2338.72,
+   "spin_axis_m": 211.79,
+   "Extension": 6.06,
+   "RelHeight": 5.94,
+   "rel_side_arm": -1.57,
+   "isFastball": true,
+   "fbTipo": "Four-Seam",
+   "fb_relspeed": 91.87,
+   "fb_ivb": 15.78,
+   "fb_hb": 11.42,
+   "fb_axis": 216.5
+  },
+  "measuredAt": "No Altitude",
+  "expectedStuffPlus": {
+   "No Altitude": 99.89,
+   "Medium Altitude": 95.736,
+   "Harp Helu": 96.374
+  }
+ },
+ {
+  "input": {
+   "tipo": "Slider",
+   "RelSpeed": 83.82,
+   "ivb": 3.15,
+   "hb_arm": -3.79,
+   "SpinRate": 2438.04,
+   "spin_axis_m": 118.46,
+   "Extension": 5.62,
+   "RelHeight": 5.74,
+   "rel_side_arm": -1.87,
+   "isFastball": false,
+   "fbTipo": "Four-Seam",
+   "fb_relspeed": 91.87,
+   "fb_ivb": 15.78,
+   "fb_hb": 11.42,
+   "fb_axis": 216.5
+  },
+  "measuredAt": "No Altitude",
+  "expectedStuffPlus": {
+   "No Altitude": 103.89,
+   "Medium Altitude": 103.177,
+   "Harp Helu": 107.167
+  }
+ },
+ {
+  "input": {
+   "tipo": "Changeup",
+   "RelSpeed": 84.12,
+   "ivb": 6.86,
+   "hb_arm": 13.35,
+   "SpinRate": 1704.31,
+   "spin_axis_m": 246.82,
+   "Extension": 5.86,
+   "RelHeight": 5.73,
+   "rel_side_arm": -1.77,
+   "isFastball": false,
+   "fbTipo": "Four-Seam",
+   "fb_relspeed": 91.87,
+   "fb_ivb": 15.78,
+   "fb_hb": 11.42,
+   "fb_axis": 216.5
+  },
+  "measuredAt": "No Altitude",
+  "expectedStuffPlus": {
+   "No Altitude": 93.854,
+   "Medium Altitude": 93.837,
+   "Harp Helu": 98.843
+  }
+ }
+]

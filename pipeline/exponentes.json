@@ -1,0 +1,78 @@
+{
+  "global": {
+    "p_magnus": 1.5014282323272108,
+    "p_drag": 0.811407903020329
+  },
+  "por_tipo": {
+    "Four-Seam": {
+      "p_magnus": 1.4367367865623981,
+      "ic95": [
+        1.390545280377365,
+        1.4840269006586981
+      ],
+      "valida_medium": true,
+      "n_celdas_extreme": 454,
+      "n_celdas_medium": 363
+    },
+    "Sinker": {
+      "p_magnus": 1.548425969311705,
+      "ic95": [
+        1.49297691128229,
+        1.6013940340125319
+      ],
+      "valida_medium": true,
+      "n_celdas_extreme": 227,
+      "n_celdas_medium": 203
+    },
+    "Slider": {
+      "p_magnus": 1.243558849970726,
+      "ic95": [
+        1.1422652192292144,
+        1.355937401809886
+      ],
+      "valida_medium": true,
+      "n_celdas_extreme": 271,
+      "n_celdas_medium": 218
+    },
+    "Changeup": {
+      "p_magnus": 1.9578665387257068,
+      "ic95": [
+        1.845687418229142,
+        2.0714576707273706
+      ],
+      "valida_medium": true,
+      "n_celdas_extreme": 148,
+      "n_celdas_medium": 143
+    },
+    "Curveball": {
+      "p_magnus": 1.75175901143212,
+      "ic95": [
+        1.6163698750528723,
+        1.8878786618241585
+      ],
+      "valida_medium": false,
+      "n_celdas_extreme": 121,
+      "n_celdas_medium": 107
+    },
+    "Cutter": {
+      "p_magnus": 1.2452485025325801,
+      "ic95": [
+        1.0404954974653247,
+        1.4396312406786622
+      ],
+      "valida_medium": true,
+      "n_celdas_extreme": 54,
+      "n_celdas_medium": 50
+    }
+  },
+  "rho": {
+    "No Altitude": 1.2073270873158615,
+    "Medium Altitude": 1.062911192934059,
+    "Extreme Altitude": 1.0097819836103306
+  },
+  "altitudes_m": {
+    "No Altitude": 151.11111111111111,
+    "Medium Altitude": 1454.0,
+    "Extreme Altitude": 1967.5
+  }
+}
