@@ -98,6 +98,8 @@ function SimulatorView({ data, inicial }: { data: DashboardData; inicial: Inicia
   const results = calculo.valor!;
   // Lo que acompaña a los resultados describe el lanzamiento que los produjo.
   const calculado = calculo.trabajo.input;
+  // El mapa redibuja cientos de figuras: se actualiza cuando el control deja de moverse, para no trabar el arrastre.
+  const mapa = useRetrasado({ results, tipo: calculado.tipo }, 200);
 
   const query = source && !editado ? `p=${source.pitcher_anon_id}&t=${source.tipo}` : `s=${codificar(input, measuredAt)}`;
   useEffect(() => {
@@ -186,11 +188,21 @@ function SimulatorView({ data, inicial }: { data: DashboardData; inicial: Inicia
       </Panel>
 
       <Resultado meta={meta} results={results} input={calculado} source={source} />
-      <MovementMap tipo={calculado.tipo} results={results} />
+      <MovementMap tipo={mapa.tipo} results={mapa.results} />
       <Palancas meta={conResultados(meta)} tipo={input.tipo} />
       <Metodo meta={meta} />
     </Vista>
   );
+}
+
+/** El valor más reciente, pero solo después de `ms` milisegundos sin cambios. */
+function useRetrasado<T>(valor: T, ms: number): T {
+  const [retrasado, setRetrasado] = useState(valor);
+  useEffect(() => {
+    const t = setTimeout(() => setRetrasado(valor), ms);
+    return () => clearTimeout(t);
+  }, [valor, ms]);
+  return retrasado;
 }
 
 /** Desplegable para cargar un lanzamiento real de un pitcher de la liga. */

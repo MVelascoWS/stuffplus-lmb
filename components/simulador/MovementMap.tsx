@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { CartesianGrid, ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
 import { Panel, Segmentado } from "@/components/consola/Panel";
 import { TIPO_PLURAL } from "@/components/consola/textos";
@@ -63,8 +63,11 @@ function ejes(valores: number[]): { domain: [number, number]; ticks: number[] } 
 
 const EJE = { fontSize: 11, fill: "var(--grafito)" };
 
-/** "¿Qué formas funcionan aquí?": las formas de la liga del mismo tipo, por su efectividad en la sede elegida. */
-export function MovementMap({ tipo, results, className }: { tipo: PitchType; results: SedeResult[]; className?: string }) {
+/**
+ * "¿Qué formas funcionan aquí?": las formas de la liga del mismo tipo, por su efectividad en la sede elegida.
+ * Memorizado: son cientos de figuras y solo deben redibujarse cuando cambia lo que muestran.
+ */
+export const MovementMap = memo(function MovementMap({ tipo, results, className }: { tipo: PitchType; results: SedeResult[]; className?: string }) {
   const { data, error } = useJson<MapData>("movement_map.json");
   const [sede, setSede] = useState<Sede>("hh");
   const formas = useMemo(() => data?.formas.filter((f) => f.tipo === tipo) ?? [], [data, tipo]);
@@ -148,4 +151,4 @@ export function MovementMap({ tipo, results, className }: { tipo: PitchType; res
       )}
     </Panel>
   );
-}
+});
