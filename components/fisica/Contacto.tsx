@@ -1,4 +1,4 @@
-import { Card, CardTitle } from "@/components/ui";
+import { Panel } from "@/components/consola/Panel";
 import { TIPO_LABEL, fmt0, fmt1, fmtSigned } from "@/lib/format";
 import type { ContactoFila, Intervalo, MetaConvocatoria } from "@/types/convocatoria";
 
@@ -9,13 +9,13 @@ function ConIntervalo({ v, ic, digits, unidad }: { v: number; ic: Intervalo; dig
   const nulo = cruzaCero(ic);
   return (
     <>
-      <span className={nulo ? "text-neutral-400" : "font-semibold text-neutral-900"}>
+      <span className={nulo ? "font-normal text-grafito" : ""}>
         {fmtSigned(v, digits)}{unidad}
       </span>
-      <span className="block text-[11px] text-neutral-500">
+      <span className="block text-[11px] font-normal text-grafito">
         {fmtSigned(ic[0], digits)} a {fmtSigned(ic[1], digits)}
       </span>
-      {nulo && <span className="block text-[11px] text-neutral-500">no distinguible de cero</span>}
+      {nulo && <span className="block text-[11px] font-normal text-grafito" style={{ fontStretch: "100%" }}>no distinguible de cero</span>}
     </>
   );
 }
@@ -23,26 +23,26 @@ function ConIntervalo({ v, ic, digits, unidad }: { v: number; ic: Intervalo; dig
 function Tabla({ filas, primera }: { filas: (ContactoFila & { nombre: string; total?: boolean })[]; primera: string }) {
   return (
     <div data-scroll-x className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="border-b border-neutral-200 text-xs text-neutral-600">
-          <tr className="align-bottom">
-            <th scope="col" className="py-2 pr-2 text-left font-medium">{primera}</th>
-            <th scope="col" className="px-2 py-2 text-right font-medium">Jonrones por 100 bolas en juego</th>
-            <th scope="col" className="px-2 py-2 text-right font-medium">Cambio en jonrones</th>
-            <th scope="col" className="py-2 pl-2 text-right font-medium">Contacto duro</th>
+      <table className="tabla">
+        <thead>
+          <tr>
+            <th scope="col">{primera}</th>
+            <th scope="col" className="n">Jonrones por 100 bolas en juego</th>
+            <th scope="col" className="n">Cambio en jonrones</th>
+            <th scope="col" className="n">Contacto duro</th>
           </tr>
         </thead>
         <tbody>
           {filas.map((f) => (
-            <tr key={f.nombre} className={`border-b border-neutral-100 align-top last:border-0 ${f.total ? "bg-neutral-50" : ""}`}>
-              <td className={`py-2 pr-2 ${f.total ? "font-semibold" : ""} text-neutral-900`}>{f.nombre}</td>
-              <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">
-                <span className="text-neutral-500">{fmt1(f.hr100_mar)}</span> → {fmt1(f.hr100_extrema)}
+            <tr key={f.nombre} className={f.total ? "bg-lienzo" : ""}>
+              <td className={f.total ? "font-semibold" : ""}>{f.nombre}</td>
+              <td className="n whitespace-nowrap">
+                <span className="tenue">{fmt1(f.hr100_mar)}</span> → {fmt1(f.hr100_extrema)}
               </td>
-              <td className="px-2 py-2 text-right tabular-nums">
+              <td className="n">
                 <ConIntervalo v={f.hr_riesgo_pct} ic={f.hr_ic95} digits={0} unidad="%" />
               </td>
-              <td className="py-2 pl-2 text-right tabular-nums">
+              <td className="n">
                 <ConIntervalo v={f.duro_dif_pp} ic={f.duro_ic95_pp} digits={1} unidad=" pp" />
               </td>
             </tr>
@@ -72,22 +72,18 @@ export function Contacto({ meta }: { meta: MetaConvocatoria }) {
   }));
 
   return (
-    <Card className="mt-6">
-      <CardTitle
-        sub={`Los mismos ${fmt0(c.pitchers)} pitchers en sedes sin altitud y de altitud extrema. Jonrones: de sin altitud → altitud extrema. Cambios con su intervalo de 95%; contacto duro en puntos porcentuales de las bolas en juego con velocidad de salida alta.`}
-      >
-        Riesgo de contacto duro y jonrón en altitud
-      </CardTitle>
+    <Panel
+      ancho={8}
+      titulo="Riesgo de contacto duro y jonrón en altitud"
+      meta={`Los mismos ${fmt0(c.pitchers)} pitchers, sin altitud → altitud extrema; cambios con su intervalo de 95%`}
+      pie="En gris, los cambios cuyo intervalo de 95% incluye el cero: con estos datos no se distinguen de cero. Cambio en jonrones: relativo, por bola en juego. Contacto duro: diferencia en puntos porcentuales (pp) de las bolas en juego con velocidad de salida alta."
+    >
       <Tabla filas={porTipo} primera="Lanzamiento" />
-      <h3 className="mt-6 text-sm font-semibold text-neutral-900">Rectas de cuatro costuras según su “ride”</h3>
-      <p className="mb-2 text-xs text-neutral-600">
-        Tercios del movimiento vertical (IVB) de la recta de cada pitcher medido a nivel del mar.
-      </p>
+      <div className="border-t border-linea px-[18px] pb-2 pt-3.5">
+        <h3 className="m-0 text-[15px] font-bold">Rectas de cuatro costuras según su “ride”</h3>
+        <span className="text-xs text-grafito">Tercios del movimiento vertical (IVB) de la recta de cada pitcher, medido a nivel del mar.</span>
+      </div>
       <Tabla filas={porRide} primera="Perfil de la recta" />
-      <p className="mt-3 text-xs text-neutral-500">
-        En gris, los cambios cuyo intervalo de 95% incluye el cero: con estos datos no se distinguen de cero. Cambio
-        en jonrones: relativo, por bola en juego. Contacto duro: diferencia en puntos porcentuales (pp).
-      </p>
-    </Card>
+    </Panel>
   );
 }

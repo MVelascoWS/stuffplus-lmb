@@ -1,28 +1,32 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Card, CardTitle } from "@/components/ui";
+import { Panel } from "@/components/consola/Panel";
 import { fmt0, fmt2, fmtPct, fmtSigned } from "@/lib/format";
 import type { MetaConvocatoria } from "@/types/convocatoria";
 
 const Seccion = ({ n }: { n: string }) => (
-  <Link href="/reporte/" className="text-accent underline-offset-2 hover:underline">sección {n}</Link>
+  <Link href="/reporte/" className="font-semibold underline underline-offset-2">sección {n}</Link>
 );
 
-/** Las cuatro hipótesis de la convocatoria con su veredicto, en los mismos términos que el reporte técnico. */
+/** Estados de docs/diseno.md: en negro lo confirmado, con borde lo respaldado. El rojo no se usa para estados. */
+type Estado = "confirmada" | "respaldada" | "nc";
+
+/** Las cuatro hipótesis de la convocatoria, una por panel, en los mismos términos que el reporte técnico. */
 export function Hipotesis({ meta }: { meta: MetaConvocatoria }) {
   const perdida = meta.perdida_mov_tipo;
-  const cambio = (xs: { tipo: string }[]) => xs.find((x) => x.tipo === "Changeup");
-  const proy = cambio(meta.delta_tipo_proyectado) as (typeof meta.delta_tipo_proyectado)[number];
-  const obs = cambio(meta.delta_tipo_observado) as (typeof meta.delta_tipo_observado)[number];
-  const hrCambio = cambio(meta.contacto.por_tipo) as (typeof meta.contacto.por_tipo)[number];
+  const cambio = <T extends { tipo: string }>(xs: T[]) => xs.find((x) => x.tipo === "Changeup") as T;
+  const proy = cambio(meta.delta_tipo_proyectado);
+  const obs = cambio(meta.delta_tipo_observado);
+  const hrCambio = cambio(meta.contacto.por_tipo);
   const { elevado_menos_rodado: em, corr_rodados_vs_carreras: cr } = meta.contacto.h3;
   // Lugar del giro entre las variables físicas por contribución SHAP (la categoría de altitud no cuenta).
   const fisicas = Object.entries(meta.robustez.shap.global).filter(([k]) => k !== "alt").sort((a, b) => b[1] - a[1]);
   const lugarGiro = fisicas.findIndex(([k]) => k === "SpinRate") + 1;
 
-  const filas: { h: string; veredicto: string; texto: ReactNode }[] = [
+  const filas: { h: string; chip: string; estado: Estado; veredicto: string; texto: ReactNode }[] = [
     {
       h: "H1. La baja densidad reduce el movimiento inducido por giro",
+      chip: "Confirmada", estado: "confirmada",
       veredicto: "Confirmada y más fuerte de lo esperado:",
       texto: (
         <>
@@ -33,6 +37,7 @@ export function Hipotesis({ meta }: { meta: MetaConvocatoria }) {
     },
     {
       h: "H2. Los lanzamientos de diferencial de velocidad (cambio) mantienen o ganan Stuff+",
+      chip: "Se mantiene", estado: "respaldada",
       veredicto: "Se mantiene, no gana:",
       texto: (
         <>
@@ -44,6 +49,7 @@ export function Hipotesis({ meta }: { meta: MetaConvocatoria }) {
     },
     {
       h: "H3. Los pitchers de rodados valen más en altitud",
+      chip: "Respaldada", estado: "respaldada",
       veredicto: "Respaldada:",
       texto: (
         <>
@@ -56,6 +62,7 @@ export function Hipotesis({ meta }: { meta: MetaConvocatoria }) {
     },
     {
       h: "H4. El giro (rpm) solo es insuficiente; importa la forma",
+      chip: "Confirmada", estado: "confirmada",
       veredicto: "Confirmada:",
       texto: (
         <>
@@ -68,18 +75,14 @@ export function Hipotesis({ meta }: { meta: MetaConvocatoria }) {
   ];
 
   return (
-    <Card>
-      <CardTitle>Las cuatro hipótesis</CardTitle>
-      <dl className="divide-y divide-neutral-100">
-        {filas.map((f) => (
-          <div key={f.h} className="grid gap-1 py-3 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:gap-6">
-            <dt className="font-medium text-neutral-900">{f.h}</dt>
-            <dd className="text-sm leading-relaxed text-neutral-700">
-              <strong className="font-semibold text-neutral-900">{f.veredicto}</strong> {f.texto}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </Card>
+    <>
+      {filas.map((f) => (
+        <Panel key={f.h} ancho={6} titulo={f.h} controles={<span className={`chip ${f.estado}`}>{f.chip}</span>}>
+          <p className="pb m-0 text-[14px] leading-relaxed">
+            <strong className="font-semibold">{f.veredicto}</strong> {f.texto}
+          </p>
+        </Panel>
+      ))}
+    </>
   );
 }
