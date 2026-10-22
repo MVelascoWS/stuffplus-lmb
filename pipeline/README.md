@@ -11,6 +11,9 @@ python3 02_features.py                  # features.parquet
 python3 03_model.py                     # modelo + validación (~6 min)
 python3 04_small_sample.py              # poder predictivo en muestras chicas
 python3 05_results.py                   # escala, proyección CDMX, perfil, tableros
+python3 07_validate_projection.py       # ¿la proyección predice el rendimiento en altitud? (~6 min)
+python3 08_calibration.py               # Stuff+ en unidades de campo (carreras, % de fallos)
+python3 09_levers.py                    # palancas de desarrollo por tipo y altitud
 python3 06_export.py                    # public/data/*.json, lib/stuffModel.ts, tests/fixtures.json
 ```
 `simulador_trayectoria.py` y `densidad_altitud.py` son el soporte físico (trayectoria con arrastre y Magnus).

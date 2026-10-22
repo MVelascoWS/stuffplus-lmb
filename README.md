@@ -6,7 +6,7 @@ delgado, con un simulador para estimar cómo rinde cualquier lanzamiento en el E
 
 Proyecto para el reto **Diablos Rojos** del hackathon ISAC 2026.
 
-- **Dashboard:** https://stuffplus-lmb.vercel.app
+- **Dashboard:** https://stuffplus-lmb.vercel.app/
 - **Reporte técnico:** [`public/reporte.html`](public/reporte.html) (versión PDF: [`public/reporte.pdf`](public/reporte.pdf))
 - **Video de demostración:** [LINK DEL VIDEO]
 
@@ -28,7 +28,8 @@ sliders y cutters lo ganan; la proyección física y lo observado en los datos c
 | Objetivo | Valor de carrera de cada lanzamiento según el cambio de conteo, con valores de conteo y pesos de eventos calculados para la LMB y batazos valorados por velocidad de salida y ángulo | `pipeline/01_target.py` |
 | Variables | Solo "stuff": velocidad, giro, movimiento, liberación y diferencias contra la recta del mismo pitcher. Sin ubicación ni etiqueta de tipo de lanzamiento | `pipeline/02_features.py` |
 | Modelo | LightGBM, 500 árboles. Stuff+ = 100 + 10·z dentro de cada categoría de altitud | `pipeline/03_model.py`, `05_results.py` |
-| Validación | Pitchers no vistos, temporada 2026 fuera de muestra, estabilidad año contra año, poder predictivo con muestras chicas | `pipeline/03_model.py`, `04_small_sample.py` |
+| Validación | Pitchers no vistos, temporada 2026 fuera de muestra, estabilidad año contra año, poder predictivo con muestras chicas, proyección a altitud contra resultados reales, equivalencias en el campo | `pipeline/03_model.py`, `04_small_sample.py`, `07_validate_projection.py`, `08_calibration.py` |
+| Palancas | Efecto promedio de cambios pequeños (velocidad, movimiento, giro, eje, extensión) por tipo de lanzamiento y altitud | `pipeline/09_levers.py` |
 | Física | Descomposición de la aceleración medida en arrastre y Magnus; exponentes por tipo con validación cruzada entre altitudes; simulador de trayectoria | `pipeline/verificacion_sin_etiquetas.py`, `simulador_trayectoria.py` |
 | Simulador web | El mismo modelo evaluado en el navegador, con el traslado físico entre sedes | `lib/stuffModel.ts`, `lib/simulator.ts` |
 
@@ -40,6 +41,10 @@ Resultados clave de la validación:
 | Igual, entrenando 2024–2025 y evaluando 2026 | 0.46 |
 | Estabilidad del Stuff+ de una temporada a la siguiente | 0.88 |
 | Con 25 lanzamientos: Stuff+ vs. resultado real para predecir el resto de la temporada | 0.37 vs. 0.16 |
+| Anticipar el Stuff+ de un pitcher en altitud desde sus lanzamientos a nivel del mar (pitchers no vistos): error del simulador vs. suponer que rinde igual | 3.2 vs. 5.9 puntos (46% menos) |
+| Correlación con las carreras reales permitidas en altitud: Stuff+ proyectado vs. Stuff+ a nivel del mar | 0.30 vs. 0.23 |
+
+Cada 10 puntos de Stuff+ equivalen en el campo a +5.3 puntos porcentuales de fallos por swing y 5.9 carreras menos por cada 1,000 lanzamientos.
 
 ## Estructura del repositorio
 

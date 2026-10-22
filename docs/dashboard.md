@@ -25,7 +25,7 @@ persona puede abrirlo con un link, desde laptop o celular, sin instalar nada.
 | Archivo | Contenido |
 |---|---|
 | `model.json` | 500 árboles del modelo en formato compacto (`[feature, umbral/valor, izq, der]` por nodo) |
-| `meta.json` | Escala por categoría de altitud, sedes y densidades, exponentes físicos, valores por defecto y rangos del simulador, percentiles, validación, perfil físico, pérdida de movimiento por tipo |
+| `meta.json` | Escala por categoría de altitud, sedes y densidades, exponentes físicos, valores por defecto y rangos del simulador, percentiles, validación, perfil físico, pérdida de movimiento por tipo, equivalencias en el campo (`calibration`), palancas (`levers`) y validación de la proyección (`projection_validation`) |
 | `pitchers.json` | 601 pitchers con al menos 300 lanzamientos: Stuff+ global, por categoría de altitud y proyectado en CDMX |
 | `arsenal.json` | Arsenal de cada pitcher, con los campos `sim_*` necesarios para cargarlo en el simulador |
 
@@ -39,6 +39,13 @@ persona puede abrirlo con un link, desde laptop o celular, sin instalar nada.
    variaciones de ejecución (±0.6 mph, ±1.2 in de movimiento) para que el resultado no dependa de un umbral
    individual del modelo.
 4. Stuff+ se escala con la media y desviación estándar de esa categoría de altitud.
+
+5. **Equivalencias:** `tangibles(meta, ΔStuff+)` traduce una diferencia de Stuff+ a fallos por swing y carreras
+   por cada 1,000 lanzamientos, con la relación medida en `pipeline/08_calibration.py`.
+6. **Palancas:** `levers(meta, tipo, sede)` devuelve, ordenados, los cambios pequeños que más suben el Stuff+ de
+   ese tipo de lanzamiento en la sede, con una descripción en lenguaje llano. Son efectos promedio sobre miles de
+   lanzamientos reales, no un cálculo sobre el punto capturado: un modelo de árboles tiene ondulaciones locales y
+   el promedio es lo estable.
 
 Sedes que muestra el simulador: sin altitud (promedio 151 m), altitud media (1,454 m) y Estadio Alfredo Harp
 Helú (2,240 m). El Harp Helú está 270 m arriba del promedio de las sedes de altitud extrema con las que se
@@ -60,12 +67,14 @@ La vista central de la demostración.
 - Resultado por sede, con el Harp Helú resaltado: Stuff+, percentil, movimiento en pulgadas y porcentaje
   perdido, y el cambio de Stuff+ frente a la sede sin altitud.
 - Gráfica de IVB contra HB con un punto por sede, que muestra cómo se encoge el movimiento.
-- Interpretación automática en una frase.
+- Interpretación automática en una frase, con el cambio de Stuff+ traducido a fallos y carreras.
+- Panel "¿Qué mover para rendir más en el Harp Helú?": las palancas del tipo de lanzamiento, con los puntos de
+  Stuff+ que aporta cada una y la nota de que son asociaciones aprendidas por el modelo.
 - Se puede abrir con un lanzamiento real desde la vista de pitchers (`?p=<pitcher>&t=<tipo>`).
 
 ### Pitchers (`/pitchers`)
 "¿Quién viaja bien a la CDMX?" Tabla ordenable y con búsqueda, ordenada por defecto por Stuff+ proyectado en
-CDMX, con filtro por mano. Al seleccionar un pitcher se muestra su arsenal (uso, Stuff+, velocidad, movimiento,
+CDMX (proyección validada contra el rendimiento real en altitud), con filtro por mano. Al seleccionar un pitcher se muestra su arsenal (uso, Stuff+, velocidad, movimiento,
 giro y cambio proyectado en CDMX por lanzamiento) con la opción de abrir cada lanzamiento en el simulador.
 
 ### Física (`/fisica`)
@@ -75,8 +84,10 @@ bien calibrado, el tiempo de vuelo no explica la pérdida, y la pelota "muerde" 
 densidad sola predice.
 
 ### Modelo (`/modelo`)
-Cómo se construyó la métrica en cinco pasos (objetivo, variables, modelo, escala, validación), la escalera de
-modelos, el poder predictivo con muestras chicas, la estabilidad año contra año y la importancia de variables.
+Cómo se construyó la métrica en cinco pasos (objetivo, variables, modelo, escala, validación); qué significa un
+punto de Stuff+ en el campo; la validación de la proyección a altitud con pitchers que el modelo no vio; la
+escalera de modelos, el poder predictivo con muestras chicas, la estabilidad año contra año y la importancia de
+variables.
 
 ### Reporte (`/reporte`)
 El reporte técnico completo, con opción de abrirlo aparte o imprimirlo como PDF.
