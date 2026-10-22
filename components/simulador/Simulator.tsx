@@ -15,6 +15,7 @@ import { conResultados } from "@/types/resultados";
 import { equivalencia } from "./equivalencias";
 import { LeversPanel } from "./LeversPanel";
 import { MovementChart } from "./MovementChart";
+import { MovementMap } from "./MovementMap";
 import { NumberField } from "./NumberField";
 
 const MEASURED_AT: SedeKey[] = ["No Altitude", "Medium Altitude", "Extreme Altitude", "Harp Helu"];
@@ -194,6 +195,7 @@ function SimulatorView({ data, source: initialSource, notFound }: {
             </CardTitle>
             <MovementChart results={results} />
           </Card>
+          <MovementMap tipo={calculado.tipo} results={results} />
           <LeversPanel meta={conResultados(meta)} tipo={input.tipo} />
           <Method meta={meta} />
         </div>

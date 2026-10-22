@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useJson } from "@/components/useJson";
 import type { ArsenalRefData, ArsenalValidation } from "@/types/candidatos";
 
 export interface CandidatosData {
@@ -8,32 +8,11 @@ export interface CandidatosData {
   validation: ArsenalValidation;
 }
 
-let pending: Promise<CandidatosData> | null = null;
-
-async function getJson<T>(name: string): Promise<T> {
-  const res = await fetch(`/data/${name}`);
-  if (!res.ok) throw new Error(`No se pudo cargar ${name} (${res.status})`);
-  return (await res.json()) as T;
-}
-
-/** Igual que los datos generales: se descargan una vez por visita y se reutilizan. */
-function load(): Promise<CandidatosData> {
-  if (!pending) {
-    pending = Promise.all([getJson<ArsenalRefData>("arsenal_ref.json"), getJson<ArsenalValidation>("arsenal_validation.json")])
-      .then(([arsenalRef, validation]) => ({ arsenalRef, validation }));
-    pending.catch(() => { pending = null; });
-  }
-  return pending;
-}
-
-export function useCandidatosData() {
-  const [state, setState] = useState<{ data?: CandidatosData; error?: string }>({});
-  useEffect(() => {
-    let alive = true;
-    load()
-      .then((data) => alive && setState({ data }))
-      .catch((e: Error) => alive && setState({ error: e.message }));
-    return () => { alive = false; };
-  }, []);
-  return state;
+/** La referencia de la liga y la validación del evaluador, descargadas una vez por visita. */
+export function useCandidatosData(): { data?: CandidatosData; error?: string } {
+  const ref = useJson<ArsenalRefData>("arsenal_ref.json");
+  const val = useJson<ArsenalValidation>("arsenal_validation.json");
+  const error = ref.error ?? val.error;
+  if (error) return { error };
+  return ref.data && val.data ? { data: { arsenalRef: ref.data, validation: val.data } } : {};
 }
