@@ -5,6 +5,7 @@ import { WithData } from "@/components/DataProvider";
 import { Stat } from "@/components/ui";
 import type { DashboardMeta } from "@/lib/data";
 import { TIPO_CON_ARTICULO, fmt0, fmt1, fmt2, fmtSigned } from "@/lib/format";
+import { conResultados } from "@/types/resultados";
 
 const VIEWS = [
   { href: "/simulador/", title: "Simulador", text: "Captura cualquier lanzamiento y mira cómo cambia su Stuff+ en el Harp Helú." },
@@ -50,7 +51,7 @@ export function Home() {
               </p>
             </section>
 
-            <section aria-label="Indicadores principales" className="mb-12 grid gap-4 sm:grid-cols-3">
+            <section aria-label="Indicadores principales" className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Stat
                 value={fmt0(ds.lanzamientos)}
                 label={`lanzamientos analizados de ${fmt0(ds.pitchers)} pitchers en ${fmt0(ds.juegos)} juegos (${ds.temporadas[0]}–${ds.temporadas[ds.temporadas.length - 1]})`}
@@ -65,6 +66,10 @@ export function Home() {
                   label={`lanzamientos bastan para que Stuff+ prediga el resto de la temporada mejor que el resultado real (correlación ${fmt2(sample.stuff)} contra ${fmt2(sample.rv)})`}
                 />
               )}
+              <Stat
+                value={`${fmt0(conResultados(meta).projection_validation.reduccion_error_pct)}%`}
+                label="menos error al anticipar el Stuff+ de un pitcher en altitud"
+              />
             </section>
 
             <section aria-labelledby="explora">
