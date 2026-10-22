@@ -10,6 +10,9 @@ import {
 } from "@/lib/data";
 import { SEDE_CORTA, TIPO_CON_DEMOSTRATIVO, TIPO_LABEL, fmt0, fmt1, fmtMeters, fmtPct, fmtSigned, fmtStuff } from "@/lib/format";
 import { simulate, type PitchInput, type PitchType, type SedeKey, type SedeResult } from "@/lib/simulator";
+import { conResultados } from "@/types/resultados";
+import { equivalencia } from "./equivalencias";
+import { LeversPanel } from "./LeversPanel";
 import { MovementChart } from "./MovementChart";
 import { NumberField } from "./NumberField";
 
@@ -179,7 +182,7 @@ function SimulatorView({ data, source: initialSource, notFound }: {
         </div>
 
         <div className="min-w-0 space-y-6">
-          <Interpretation results={results} tipo={deferredInput.tipo} />
+          <Interpretation results={results} tipo={deferredInput.tipo} meta={meta} />
           <div className="grid gap-4 sm:grid-cols-3">
             {results.map((res) => (
               <ResultCard key={res.sede} r={res} base={results[0]} meta={meta} />
@@ -191,6 +194,7 @@ function SimulatorView({ data, source: initialSource, notFound }: {
             </CardTitle>
             <MovementChart results={results} />
           </Card>
+          <LeversPanel meta={conResultados(meta)} tipo={deferredInput.tipo} />
           <Method meta={meta} />
         </div>
       </div>
@@ -260,7 +264,7 @@ function Row({ k, v, strong }: { k: string; v: string; strong?: boolean }) {
 }
 
 /** Una frase que resume el resultado para quien no quiere leer la tabla. */
-function Interpretation({ results, tipo }: { results: SedeResult[]; tipo: PitchType }) {
+function Interpretation({ results, tipo, meta }: { results: SedeResult[]; tipo: PitchType; meta: DashboardMeta }) {
   const base = results.find((x) => x.sede === "No Altitude")!;
   const harp = results.find((x) => x.sede === "Harp Helu")!;
   const a = Math.round(base.stuffPlus), b = Math.round(harp.stuffPlus);
@@ -270,9 +274,12 @@ function Interpretation({ results, tipo }: { results: SedeResult[]; tipo: PitchT
   if (b > a) rest = `aun así su Stuff+ sube de ${a} a ${b}, porque pierde menos que el lanzamiento típico de esa sede: viaja bien a la CDMX.`;
   else if (b < a) rest = `su Stuff+ baja de ${a} a ${b}, porque pierde más que el lanzamiento típico de esa sede.`;
   else rest = `su Stuff+ se queda en ${a}: pierde lo mismo que el lanzamiento típico de esa sede.`;
+  // La equivalencia usa el cambio exacto, no la diferencia entre los valores redondeados.
+  const eq = b !== a ? equivalencia(meta, harp.stuffPlus - base.stuffPlus) : null;
   return (
     <p className="rounded-lg border-l-4 border-accent bg-white p-4 text-base leading-relaxed text-neutral-800">
       En el Harp Helú {name} pierde {lost}% de su movimiento frente al nivel del mar; {rest}
+      {eq && ` En el campo, ese cambio equivale a ${eq.fallos} y ${eq.carreras}.`}
     </p>
   );
 }
