@@ -27,6 +27,8 @@ persona puede abrirlo con un link, desde laptop o celular, sin instalar nada.
 | `model.json` | 500 árboles del modelo en formato compacto (`[feature, umbral/valor, izq, der]` por nodo) |
 | `meta.json` | Escala por categoría de altitud, sedes y densidades, exponentes físicos, valores por defecto y rangos del simulador, percentiles, validación, perfil físico, pérdida de movimiento por tipo, equivalencias en el campo (`calibration`), palancas (`levers`) y validación de la proyección (`projection_validation`) |
 | `pitchers.json` | 601 pitchers con al menos 300 lanzamientos: Stuff+ global, por categoría de altitud y proyectado en CDMX |
+| `arsenal_ref.json` | Calificación de arsenal de los 601 pitchers de la tabla, calculada con el mismo evaluador que la vista de candidatos: referencia para "por encima del X% de la liga" |
+| `arsenal_validation.json` | Validación del evaluador de arsenal con pitchers que el modelo no vio |
 | `arsenal.json` | Arsenal de cada pitcher, con los campos `sim_*` necesarios para cargarlo en el simulador |
 
 ## Lógica del simulador (`lib/simulator.ts`)
@@ -76,6 +78,26 @@ La vista central de la demostración.
 "¿Quién viaja bien a la CDMX?" Tabla ordenable y con búsqueda, ordenada por defecto por Stuff+ proyectado en
 CDMX (proyección validada contra el rendimiento real en altitud), con filtro por mano. Al seleccionar un pitcher se muestra su arsenal (uso, Stuff+, velocidad, movimiento,
 giro y cambio proyectado en CDMX por lanzamiento) con la opción de abrir cada lanzamiento en el simulador.
+
+### Evaluar candidato (`/candidatos`)
+La herramienta de adquisición: capturar el arsenal de un pitcher de cualquier liga, sin nombre, y obtener su
+calificación en el Harp Helú comparada contra la LMB. Usa `lib/arsenal.ts`.
+- **Captura del pitcher (una vez):** mano, dónde se midieron los datos, extensión, altura y lado de liberación.
+- **Captura por lanzamiento (hasta 6):** tipo, % de uso, velocidad, IVB, HB, giro y eje. Al elegir el tipo se
+  precargan valores típicos. El uso se normaliza para sumar 100.
+- **Recta principal automática:** la Four-Seam o Sinker más usada; si no hay, el Cutter; si no, el lanzamiento más
+  rápido (en ese caso se indica como "lanzamiento de referencia"). Los demás se comparan contra ella.
+- **Resultado:** Stuff+ del arsenal (promedio ponderado por uso) sin altitud, en altitud media y en el Harp Helú,
+  con su percentil frente a los pitchers de la liga (`arsenal_ref.json`, mismo método); tabla por lanzamiento con su
+  Stuff+ en cada sede y el cambio; equivalencia en el campo del cambio; palancas del lanzamiento más débil en el
+  Harp Helú.
+- **Ejemplo con datos reales:** cargar el arsenal de cualquier pitcher anónimo de la liga como punto de partida.
+- **Comparar:** hasta tres candidatos lado a lado.
+- **Compartir:** el arsenal capturado viaja en la URL (`encodeArsenal` / `decodeArsenal`), sin nombres ni servidor.
+- **Validación, en la vista:** con pitchers que el modelo no vio, anticipa el Stuff+ de su arsenal en altitud con
+  23% menos error que suponer que rinde igual; contra las carreras reales apunta en la misma dirección, pero
+  con 294 pitchers la mejora todavía no es estadísticamente concluyente. Stuff+ no mide comando: para candidatos con muchos
+  lanzamientos registrados, verlo junto con sus resultados.
 
 ### Física (`/fisica`)
 Pérdida de movimiento por tipo de lanzamiento contra la predicción por densidad; exponentes por tipo con su

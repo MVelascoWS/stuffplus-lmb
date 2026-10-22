@@ -1,0 +1,219 @@
+[
+ {
+  "input": {
+   "mano": "Right",
+   "measuredAt": "No Altitude",
+   "Extension": 6.1,
+   "RelHeight": 5.7,
+   "rel_side_arm": -1.9,
+   "pitches": [
+    {
+     "tipo": "Four-Seam",
+     "uso": 50,
+     "RelSpeed": 92.15,
+     "ivb": 17.09,
+     "hb_arm": 9.84,
+     "SpinRate": 2338.72,
+     "spin_axis_m": 211.79
+    },
+    {
+     "tipo": "Slider",
+     "uso": 30,
+     "RelSpeed": 83.82,
+     "ivb": 3.15,
+     "hb_arm": -3.79,
+     "SpinRate": 2438.04,
+     "spin_axis_m": 118.46
+    },
+    {
+     "tipo": "Changeup",
+     "uso": 20,
+     "RelSpeed": 84.12,
+     "ivb": 6.86,
+     "hb_arm": 13.35,
+     "SpinRate": 1704.31,
+     "spin_axis_m": 246.82
+    }
+   ]
+  },
+  "expected": {
+   "pitches": [
+    {
+     "tipo": "Four-Seam",
+     "stuff": {
+      "No Altitude": 106.73857480908414,
+      "Medium Altitude": 100.70251568485182,
+      "Harp Helu": 100.59624026750302
+     }
+    },
+    {
+     "tipo": "Slider",
+     "stuff": {
+      "No Altitude": 111.0267945829186,
+      "Medium Altitude": 109.08739993699203,
+      "Harp Helu": 108.93728086543744
+     }
+    },
+    {
+     "tipo": "Changeup",
+     "stuff": {
+      "No Altitude": 105.04311110022049,
+      "Medium Altitude": 104.77299989773684,
+      "Harp Helu": 102.97165159544019
+     }
+    }
+   ],
+   "stuff": {
+    "No Altitude": 107.68594799946176,
+    "Medium Altitude": 104.03207780307088,
+    "Harp Helu": 103.57363471247078
+   },
+   "recta": "Four-Seam"
+  }
+ },
+ {
+  "input": {
+   "mano": "Left",
+   "measuredAt": "Harp Helu",
+   "Extension": 5.8,
+   "RelHeight": 5.9,
+   "rel_side_arm": -1.5,
+   "pitches": [
+    {
+     "tipo": "Sinker",
+     "uso": 40,
+     "RelSpeed": 91.26,
+     "ivb": 10.66,
+     "hb_arm": 15.91,
+     "SpinRate": 2253.79,
+     "spin_axis_m": 237.83
+    },
+    {
+     "tipo": "Cutter",
+     "uso": 25,
+     "RelSpeed": 88.9,
+     "ivb": 10.37,
+     "hb_arm": -0.4,
+     "SpinRate": 2525.62,
+     "spin_axis_m": 177.73
+    },
+    {
+     "tipo": "Curveball",
+     "uso": 20,
+     "RelSpeed": 78.55,
+     "ivb": -8.22,
+     "hb_arm": -9.46,
+     "SpinRate": 2550.19,
+     "spin_axis_m": 42.89,
+     "measuredAt": "No Altitude"
+    },
+    {
+     "tipo": "Changeup",
+     "uso": 15,
+     "RelSpeed": 84.12,
+     "ivb": 6.86,
+     "hb_arm": 13.35,
+     "SpinRate": 1704.31,
+     "spin_axis_m": 246.82
+    }
+   ]
+  },
+  "expected": {
+   "pitches": [
+    {
+     "tipo": "Sinker",
+     "stuff": {
+      "No Altitude": 112.61811040419312,
+      "Medium Altitude": 99.20556233464822,
+      "Harp Helu": 93.5945409948134
+     }
+    },
+    {
+     "tipo": "Cutter",
+     "stuff": {
+      "No Altitude": 109.22024211046477,
+      "Medium Altitude": 113.72006987910213,
+      "Harp Helu": 111.48368638009914
+     }
+    },
+    {
+     "tipo": "Curveball",
+     "stuff": {
+      "No Altitude": 111.425190308613,
+      "Medium Altitude": 109.55320528997727,
+      "Harp Helu": 106.23569684403223
+     }
+    },
+    {
+     "tipo": "Changeup",
+     "stuff": {
+      "No Altitude": 103.01335511731065,
+      "Medium Altitude": 90.93838710564899,
+      "Harp Helu": 87.87789750959304
+     }
+    }
+   ],
+   "stuff": {
+    "No Altitude": 110.08934601861264,
+    "Medium Altitude": 103.66364152747762,
+    "Harp Helu": 99.73756198819554
+   },
+   "recta": "Sinker"
+  }
+ },
+ {
+  "input": {
+   "mano": "Right",
+   "measuredAt": "Medium Altitude",
+   "Extension": 6.3,
+   "RelHeight": 5.5,
+   "rel_side_arm": -2.1,
+   "pitches": [
+    {
+     "tipo": "Slider",
+     "uso": 60,
+     "RelSpeed": 83.82,
+     "ivb": 3.15,
+     "hb_arm": -3.79,
+     "SpinRate": 2438.04,
+     "spin_axis_m": 118.46
+    },
+    {
+     "tipo": "Curveball",
+     "uso": 40,
+     "RelSpeed": 78.55,
+     "ivb": -8.22,
+     "hb_arm": -9.46,
+     "SpinRate": 2550.19,
+     "spin_axis_m": 42.89
+    }
+   ]
+  },
+  "expected": {
+   "pitches": [
+    {
+     "tipo": "Slider",
+     "stuff": {
+      "No Altitude": 98.06823385188329,
+      "Medium Altitude": 99.58647948553896,
+      "Harp Helu": 100.80151892920185
+     }
+    },
+    {
+     "tipo": "Curveball",
+     "stuff": {
+      "No Altitude": 124.47223052646288,
+      "Medium Altitude": 117.62496199760642,
+      "Harp Helu": 112.71108232284158
+     }
+    }
+   ],
+   "stuff": {
+    "No Altitude": 108.62983252171512,
+    "Medium Altitude": 106.80187249036595,
+    "Harp Helu": 105.56534428665773
+   },
+   "recta": "Slider"
+  }
+ }
+]

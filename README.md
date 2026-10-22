@@ -32,6 +32,7 @@ sliders y cutters lo ganan; la proyección física y lo observado en los datos c
 | Palancas | Efecto promedio de cambios pequeños (velocidad, movimiento, giro, eje, extensión) por tipo de lanzamiento y altitud | `pipeline/09_levers.py` |
 | Física | Descomposición de la aceleración medida en arrastre y Magnus; exponentes por tipo con validación cruzada entre altitudes; simulador de trayectoria | `pipeline/verificacion_sin_etiquetas.py`, `simulador_trayectoria.py` |
 | Simulador web | El mismo modelo evaluado en el navegador, con el traslado físico entre sedes | `lib/stuffModel.ts`, `lib/simulator.ts` |
+| Evaluador de candidatos | Califica el arsenal completo de un pitcher de cualquier liga en el Harp Helú y lo ubica frente a la LMB | `lib/arsenal.ts`, `scripts/build-arsenal-ref.ts`, `pipeline/10_arsenal.py` |
 
 Resultados clave de la validación:
 
@@ -52,14 +53,17 @@ Cada 10 puntos de Stuff+ equivalen en el campo a +5.3 puntos porcentuales de fal
 ├── app/, components/       Dashboard (Next.js, sitio estático)
 ├── lib/
 │   ├── stuffModel.ts        Evaluador del modelo en TypeScript
-│   └── simulator.ts         Traslado físico entre sedes + calificación
+│   ├── simulator.ts         Traslado físico entre sedes + calificación
+│   └── arsenal.ts           Evaluación del arsenal completo de un candidato
 ├── public/
 │   ├── data/                Modelo y tableros generados por el pipeline (JSON)
 │   ├── reporte.html         Reporte técnico
 │   └── reporte.pdf
 ├── pipeline/                Código de Python que genera public/data/ (ver pipeline/README.md)
-├── tests/fixtures.json      Casos de referencia: Stuff+ esperado por sede, calculado en Python
-├── scripts/check-fixtures.ts  Verifica que el simulador web reproduce los casos de referencia
+├── tests/                   Casos de referencia calculados en Python (lanzamientos y arsenales)
+├── scripts/
+│   ├── check-fixtures.ts    Verifica que la versión web reproduce los casos de referencia
+│   └── build-arsenal-ref.ts Calcula la referencia de la liga para el evaluador de arsenal
 └── docs/dashboard.md        Diseño funcional del dashboard
 ```
 

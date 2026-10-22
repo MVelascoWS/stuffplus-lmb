@@ -8,7 +8,8 @@
     "postbuild": "node scripts/publicar-reporte.mjs",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsx scripts/check-fixtures.ts"
+    "check": "tsx scripts/check-fixtures.ts",
+    "arsenal-ref": "tsx scripts/build-arsenal-ref.ts"
   },
   "dependencies": {
     "next": "16.4.2",
