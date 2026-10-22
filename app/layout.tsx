@@ -1,26 +1,29 @@
 import type { Metadata, Viewport } from "next";
+import { Archivo } from "next/font/google";
 import { DataProvider } from "@/components/DataProvider";
-import { SiteHeader } from "@/components/SiteHeader";
+import { BarraLateral } from "@/components/consola/BarraLateral";
 import "./globals.css";
 
+// Archivo con su eje de ancho: las cifras se muestran condensadas al 70% (clase .num en globals.css).
+const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], display: "swap", variable: "--font-archivo" });
+
 export const metadata: Metadata = {
-  title: { default: "Stuff+ por altitud · LMB", template: "%s · Stuff+ por altitud" },
+  title: { default: "Stuff+ LMB", template: "%s · Stuff+ LMB" },
   description:
     "Métrica de calidad de pitcheo para la Liga Mexicana de Béisbol que incorpora la física del aire delgado, con un simulador para el Estadio Alfredo Harp Helú.",
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#000000" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">
+    <html lang="es" className={archivo.variable}>
+      <body>
         <DataProvider>
-          <SiteHeader />
-          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:py-10">{children}</main>
-          <footer className="border-t border-neutral-200 py-6 text-center text-xs text-neutral-500">
-            Datos Trackman de la LMB con pitchers anónimos. Todo el cálculo ocurre en tu navegador.
-          </footer>
+          <div className="app">
+            <BarraLateral />
+            <div className="cont">{children}</div>
+          </div>
         </DataProvider>
       </body>
     </html>

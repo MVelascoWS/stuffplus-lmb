@@ -1,3 +1,4 @@
+import { EnLienzo } from "@/components/consola/Vista";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Simulator } from "@/components/simulador/Simulator";
@@ -7,6 +8,7 @@ export const metadata: Metadata = { title: "Simulador" };
 
 export default function SimuladorPage() {
   return (
+    <EnLienzo>
     <>
       <PageIntro title="¿Cómo rinde este lanzamiento en la Ciudad de México?">
         <p>
@@ -22,5 +24,6 @@ export default function SimuladorPage() {
         <Simulator />
       </Suspense>
     </>
+    </EnLienzo>
   );
 }

@@ -1,3 +1,4 @@
+import { EnLienzo } from "@/components/consola/Vista";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Candidatos } from "@/components/candidatos/Candidatos";
@@ -7,6 +8,7 @@ export const metadata: Metadata = { title: "Evaluar candidato" };
 
 export default function CandidatosPage() {
   return (
+    <EnLienzo>
     <>
       <PageIntro title="Evaluar a un candidato para el Harp Helú">
         <p>
@@ -19,5 +21,6 @@ export default function CandidatosPage() {
         <Candidatos />
       </Suspense>
     </>
+    </EnLienzo>
   );
 }
