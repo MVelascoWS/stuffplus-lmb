@@ -217,6 +217,12 @@ function ArsenalPanel({ pitcher, pitches }: { pitcher: Pitcher; pitches: Arsenal
         Arsenal de <span className="font-medium text-neutral-900">{pitcher.pitcher_anon_id}</span> ({MANO_LABEL[pitcher.mano].toLowerCase()}).
         Movimiento horizontal hacia el lado del brazo.
       </p>
+      <Link
+        href={`/candidatos/?a=${pitcher.pitcher_anon_id}`}
+        className="mb-3 inline-block rounded border border-accent px-3 py-1.5 text-sm font-medium text-accent hover:bg-accent-soft"
+      >
+        Evaluar como candidato →
+      </Link>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {pitches.map((a) => (
           <li key={a.tipo} className="rounded-lg border border-neutral-200 bg-white p-3">
