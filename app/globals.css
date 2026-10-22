@@ -180,7 +180,7 @@ table.tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
 .tabla thead th { background: var(--tinta); color: var(--papel); font-weight: 600; font-size: 12px; text-align: left; padding: 9px 12px; vertical-align: bottom; }
 .tabla thead th.n, .tabla td.n { text-align: right; }
 .tabla thead th.hh { background: var(--rojo); }
-.tabla td { padding: 9px 12px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+.tabla td { padding: 9px 12px; border-bottom: 1px solid var(--linea); vertical-align: middle; }
 .tabla td.n { font-stretch: 70%; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 16px; }
 .tabla td.hh { background: var(--rojo-suave); color: var(--rojo); }
 .tabla tbody tr:last-child td { border-bottom: 0; }
