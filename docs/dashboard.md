@@ -25,10 +25,11 @@ persona puede abrirlo con un link, desde laptop o celular, sin instalar nada.
 | Archivo | Contenido |
 |---|---|
 | `model.json` | 500 árboles del modelo en formato compacto (`[feature, umbral/valor, izq, der]` por nodo) |
-| `meta.json` | Escala por categoría de altitud, sedes y densidades, exponentes físicos, valores por defecto y rangos del simulador, percentiles, validación, perfil físico, pérdida de movimiento por tipo, equivalencias en el campo (`calibration`), palancas (`levers`) y validación de la proyección (`projection_validation`) |
+| `meta.json` | Escala por categoría de altitud, sedes y densidades, exponentes físicos, valores por defecto y rangos del simulador, percentiles, validación, perfil físico, pérdida de movimiento por tipo, equivalencias en el campo (`calibration`), palancas (`levers`), validación de la proyección (`projection_validation`), robustez (`robustez`: baseline por conteo, park holdout, SHAP) y riesgo de contacto (`contacto`: contacto duro, jonrón e hipótesis H3) |
 | `pitchers.json` | 601 pitchers con al menos 300 lanzamientos: Stuff+ global, por categoría de altitud y proyectado en CDMX |
 | `arsenal_ref.json` | Calificación de arsenal de los 601 pitchers de la tabla, calculada con el mismo evaluador que la vista de candidatos: referencia para "por encima del X% de la liga" |
 | `arsenal_validation.json` | Validación del evaluador de arsenal con pitchers que el modelo no vio |
+| `movement_map.json` | Forma promedio (IVB y HB) de cada pitcher × lanzamiento a nivel del mar y trasladada al Harp Helú, con su Stuff+ en cada sede y su percentil dentro de su tipo |
 | `arsenal.json` | Arsenal de cada pitcher, con los campos `sim_*` necesarios para cargarlo en el simulador |
 
 ## Lógica del simulador (`lib/simulator.ts`)
@@ -37,9 +38,11 @@ persona puede abrirlo con un link, desde laptop o celular, sin instalar nada.
    de la sede donde se midió: `(ρ_sede / ρ_mar) ^ p_tipo`.
 2. Se traslada a cada sede multiplicando por el factor de esa sede. La recta del mismo pitcher se traslada con
    el exponente de su propio tipo, y las diferencias lanzamiento − recta se recalculan.
-3. El modelo califica el lanzamiento con la categoría de altitud de la sede. La predicción se promedia sobre 64
-   variaciones de ejecución (±0.6 mph, ±1.2 in de movimiento) para que el resultado no dependa de un umbral
-   individual del modelo.
+3. El modelo califica el lanzamiento con la categoría de altitud de la sede. La predicción se promedia sobre 128
+   variaciones de ejecución del lanzamiento y de la recta (`meta.smoothing`): la mitad de la variación natural de cada
+   variable, por ejemplo ±0.6 mph, ±1.2 in de movimiento, ±50 rpm o ±0.11 ft de extensión. Así un cambio de una
+   décima no mueve la calificación por un umbral del modelo, y reabrir un link (dos decimales) cambia menos de medio
+   punto.
 4. Stuff+ se escala con la media y desviación estándar de esa categoría de altitud.
 
 5. **Equivalencias:** `tangibles(meta, ΔStuff+)` traduce una diferencia de Stuff+ a fallos por swing y carreras
@@ -73,6 +76,10 @@ La vista central de la demostración.
 - Panel "¿Qué mover para rendir más en el Harp Helú?": las palancas del tipo de lanzamiento, con los puntos de
   Stuff+ que aporta cada una y la nota de que son asociaciones aprendidas por el modelo.
 - Se puede abrir con un lanzamiento real desde la vista de pitchers (`?p=<pitcher>&t=<tipo>`).
+- **Mapa de movimiento** (`movement_map.json`): las formas de la liga del mismo tipo de lanzamiento en el plano IVB
+  contra HB, coloreadas por Stuff+, con selector de sede (sin altitud: `ivb`, `hb`, `s_mar`; Harp Helú: `ivb_hh`,
+  `hb_hh`, `s_hh`). Resalta el 10% más efectivo y el 10% menos efectivo de su tipo (`s_*_pct`) y muestra encima el
+  lanzamiento capturado en esa sede. Responde "¿qué formas funcionan aquí?".
 
 ### Pitchers (`/pitchers`)
 "¿Quién viaja bien a la CDMX?" Tabla ordenable y con búsqueda, ordenada por defecto por Stuff+ proyectado en
@@ -100,7 +107,9 @@ calificación en el Harp Helú comparada contra la LMB. Usa `lib/arsenal.ts`.
   lanzamientos registrados, verlo junto con sus resultados.
 
 ### Física (`/fisica`)
-Pérdida de movimiento por tipo de lanzamiento contra la predicción por densidad; exponentes por tipo con su
+Las cuatro hipótesis de la convocatoria (H1 a H4) con su veredicto; riesgo de contacto duro y jonrón por tipo de
+lanzamiento y por "ride" de la recta (`meta.contacto`, con intervalos de confianza: lo no significativo se
+muestra como tal); el costo de un elevado frente a un rodado por sede (H3). Pérdida de movimiento por tipo de lanzamiento contra la predicción por densidad; exponentes por tipo con su
 intervalo de confianza y si validaron en altitud media; y tres conclusiones en lenguaje llano: el sensor está
 bien calibrado, el tiempo de vuelo no explica la pérdida, y la pelota "muerde" menos el aire de lo que la
 densidad sola predice.
@@ -108,8 +117,9 @@ densidad sola predice.
 ### Modelo (`/modelo`)
 Cómo se construyó la métrica en cinco pasos (objetivo, variables, modelo, escala, validación); qué significa un
 punto de Stuff+ en el campo; la validación de la proyección a altitud con pitchers que el modelo no vio; la
-escalera de modelos, el poder predictivo con muestras chicas, la estabilidad año contra año y la importancia de
-variables.
+escalera de modelos, el poder predictivo con muestras chicas, la estabilidad año contra año, la tabla de
+validaciones que pide la convocatoria (baseline nulo por conteo, pitcher, season y park holdout, desde
+`meta.robustez`) y la contribución de cada variable con valores SHAP (en puntos de Stuff+).
 
 ### Reporte (`/reporte`)
 El reporte técnico completo, con opción de abrirlo aparte o imprimirlo como PDF.

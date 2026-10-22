@@ -41,32 +41,32 @@
     {
      "tipo": "Four-Seam",
      "stuff": {
-      "No Altitude": 106.73857480908414,
-      "Medium Altitude": 100.70251568485182,
-      "Harp Helu": 100.59624026750302
+      "No Altitude": 103.38734020016649,
+      "Medium Altitude": 97.32513880862162,
+      "Harp Helu": 98.34838229995351
      }
     },
     {
      "tipo": "Slider",
      "stuff": {
-      "No Altitude": 111.0267945829186,
-      "Medium Altitude": 109.08739993699203,
-      "Harp Helu": 108.93728086543744
+      "No Altitude": 105.94969988435135,
+      "Medium Altitude": 105.79407448728985,
+      "Harp Helu": 106.54298168216117
      }
     },
     {
      "tipo": "Changeup",
      "stuff": {
-      "No Altitude": 105.04311110022049,
-      "Medium Altitude": 104.77299989773684,
-      "Harp Helu": 102.97165159544019
+      "No Altitude": 99.65319397111608,
+      "Medium Altitude": 100.9320815421703,
+      "Harp Helu": 101.9243071019924
      }
     }
    ],
    "stuff": {
-    "No Altitude": 107.68594799946176,
-    "Medium Altitude": 104.03207780307088,
-    "Harp Helu": 103.57363471247078
+    "No Altitude": 103.40921885961187,
+    "Medium Altitude": 100.58720805893182,
+    "Harp Helu": 101.52194707502359
    },
    "recta": "Four-Seam"
   }
@@ -123,40 +123,40 @@
     {
      "tipo": "Sinker",
      "stuff": {
-      "No Altitude": 112.61811040419312,
-      "Medium Altitude": 99.20556233464822,
-      "Harp Helu": 93.5945409948134
+      "No Altitude": 110.6706199827443,
+      "Medium Altitude": 97.81142865973557,
+      "Harp Helu": 93.51663033375931
      }
     },
     {
      "tipo": "Cutter",
      "stuff": {
-      "No Altitude": 109.22024211046477,
-      "Medium Altitude": 113.72006987910213,
-      "Harp Helu": 111.48368638009914
+      "No Altitude": 109.57991280444502,
+      "Medium Altitude": 114.66302299876386,
+      "Harp Helu": 111.51064617819556
      }
     },
     {
      "tipo": "Curveball",
      "stuff": {
-      "No Altitude": 111.425190308613,
-      "Medium Altitude": 109.55320528997727,
-      "Harp Helu": 106.23569684403223
+      "No Altitude": 107.90253192894049,
+      "Medium Altitude": 109.66112533910986,
+      "Harp Helu": 105.55973948637725
      }
     },
     {
      "tipo": "Changeup",
      "stuff": {
-      "No Altitude": 103.01335511731065,
-      "Medium Altitude": 90.93838710564899,
-      "Harp Helu": 87.87789750959304
+      "No Altitude": 103.99737975659357,
+      "Medium Altitude": 92.28630316233482,
+      "Harp Helu": 89.3539430195717
      }
     }
    ],
    "stuff": {
-    "No Altitude": 110.08934601861264,
-    "Medium Altitude": 103.66364152747762,
-    "Harp Helu": 99.73756198819554
+    "No Altitude": 108.84333954348611,
+    "Medium Altitude": 103.56549775575739,
+    "Harp Helu": 99.79935302826382
    },
    "recta": "Sinker"
   }
@@ -194,24 +194,24 @@
     {
      "tipo": "Slider",
      "stuff": {
-      "No Altitude": 98.06823385188329,
-      "Medium Altitude": 99.58647948553896,
-      "Harp Helu": 100.80151892920185
+      "No Altitude": 97.30035229168736,
+      "Medium Altitude": 99.70299391173005,
+      "Harp Helu": 100.63366443619891
      }
     },
     {
      "tipo": "Curveball",
      "stuff": {
-      "No Altitude": 124.47223052646288,
-      "Medium Altitude": 117.62496199760642,
-      "Harp Helu": 112.71108232284158
+      "No Altitude": 122.04040698793668,
+      "Medium Altitude": 116.59054796925791,
+      "Harp Helu": 109.06181970123178
      }
     }
    ],
    "stuff": {
-    "No Altitude": 108.62983252171512,
-    "Medium Altitude": 106.80187249036595,
-    "Harp Helu": 105.56534428665773
+    "No Altitude": 107.19637417018708,
+    "Medium Altitude": 106.4580155347412,
+    "Harp Helu": 104.00492654221206
    },
    "recta": "Slider"
   }

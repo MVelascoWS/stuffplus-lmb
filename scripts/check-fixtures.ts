@@ -32,6 +32,7 @@ const arsenalCases = read<{ input: ArsenalInput; expected: { recta: string; stuf
   "tests/arsenal_fixtures.json",
 );
 let fallas = 0;
+let linkWorst = 0;
 for (const c of arsenalCases) {
   const r = evaluateArsenal(model, meta, c.input);
   if (r.recta !== c.expected.recta) { console.error(`FALLA: recta ${r.recta} vs ${c.expected.recta}`); fallas++; }
@@ -52,13 +53,21 @@ for (const c of arsenalCases) {
 const ref = read<{ porPitcher: Record<string, Record<string, number>> }>("public/data/arsenal_ref.json");
 const filas = read<ArsenalRow[]>("public/data/arsenal.json");
 const manos = new Map(read<{ pitcher_anon_id: string; mano: string }[]>("public/data/pitchers.json").map((p) => [p.pitcher_anon_id, p.mano]));
-for (const id of Object.keys(ref.porPitcher).slice(0, 10)) {
+for (const id of Object.keys(ref.porPitcher)) {
   const a = arsenalDeLaLiga(manos.get(id) ?? "Right", filas.filter((r) => r.pitcher_anon_id === id));
   const r = evaluateArsenal(model, meta, a);
   for (const [sede, v] of Object.entries(ref.porPitcher[id])) worst = Math.max(worst, Math.abs(r.stuff[sede as keyof typeof r.stuff] - v));
   const back = decodeArsenal(encodeArsenal(a));
   if (!back || back.pitches.some((p, i) => (p.measuredAt ?? back.measuredAt) !== (a.pitches[i].measuredAt ?? a.measuredAt))) {
     console.error(`FALLA: el link pierde la sede de medición (${id})`); fallas++;
+  } else {
+    // reabrir el link debe dar practicamente la misma calificacion (redondeo de la URL)
+    const rb = evaluateArsenal(model, meta, back);
+    for (const [sede, v] of Object.entries(r.stuff)) {
+      const d = Math.abs(rb.stuff[sede as keyof typeof rb.stuff] - v);
+      linkWorst = Math.max(linkWorst, d);
+      if (d > 0.5) { console.error(`FALLA: el link cambia la calificación ${d.toFixed(2)} puntos (${id}, ${sede})`); fallas++; }
+    }
   }
 }
 
@@ -68,4 +77,4 @@ if (worst > TOL || fallas) {
   console.error(`FALLA: diferencia máxima ${worst.toFixed(4)} (tolerancia ${TOL}), ${fallas} fallas`);
   process.exit(1);
 }
-console.log(`OK: ${cases.length} lanzamientos y ${arsenalCases.length} arsenales, diferencia máxima ${worst.toExponential(2)}`);
+console.log(`OK: ${cases.length} lanzamientos, ${arsenalCases.length} arsenales y ${Object.keys(ref.porPitcher).length} pitchers de la liga; diferencia máxima ${worst.toExponential(2)}; reabrir un link cambia como máximo ${linkWorst.toFixed(2)} puntos`);

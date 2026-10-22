@@ -19,9 +19,9 @@
   },
   "measuredAt": "No Altitude",
   "expectedStuffPlus": {
-   "No Altitude": 99.89,
-   "Medium Altitude": 95.736,
-   "Harp Helu": 96.374
+   "No Altitude": 98.427,
+   "Medium Altitude": 94.275,
+   "Harp Helu": 94.365
   }
  },
  {
@@ -44,9 +44,9 @@
   },
   "measuredAt": "No Altitude",
   "expectedStuffPlus": {
-   "No Altitude": 103.89,
-   "Medium Altitude": 103.177,
-   "Harp Helu": 107.167
+   "No Altitude": 103.95,
+   "Medium Altitude": 103.834,
+   "Harp Helu": 104.677
   }
  },
  {
@@ -69,9 +69,9 @@
   },
   "measuredAt": "No Altitude",
   "expectedStuffPlus": {
-   "No Altitude": 93.854,
-   "Medium Altitude": 93.837,
-   "Harp Helu": 98.843
+   "No Altitude": 94.793,
+   "Medium Altitude": 96.433,
+   "Harp Helu": 99.228
   }
  }
 ]

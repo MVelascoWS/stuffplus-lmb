@@ -29,16 +29,19 @@ sliders y cutters lo ganan; la proyección física y lo observado en los datos c
 | Variables | Solo "stuff": velocidad, giro, movimiento, liberación y diferencias contra la recta del mismo pitcher. Sin ubicación ni etiqueta de tipo de lanzamiento | `pipeline/02_features.py` |
 | Modelo | LightGBM, 500 árboles. Stuff+ = 100 + 10·z dentro de cada categoría de altitud | `pipeline/03_model.py`, `05_results.py` |
 | Validación | Pitchers no vistos, temporada 2026 fuera de muestra, estabilidad año contra año, poder predictivo con muestras chicas, proyección a altitud contra resultados reales, equivalencias en el campo | `pipeline/03_model.py`, `04_small_sample.py`, `07_validate_projection.py`, `08_calibration.py` |
+| Riesgo y robustez | Riesgo de contacto duro y jonrón por perfil en altitud, hipótesis H3 (rodados), baseline por conteo, park holdout y SHAP | `pipeline/11_contacto.py`, `13_robustez.py`, `13b_park_estricto.py` |
 | Palancas | Efecto promedio de cambios pequeños (velocidad, movimiento, giro, eje, extensión) por tipo de lanzamiento y altitud | `pipeline/09_levers.py` |
 | Física | Descomposición de la aceleración medida en arrastre y Magnus; exponentes por tipo con validación cruzada entre altitudes; simulador de trayectoria | `pipeline/verificacion_sin_etiquetas.py`, `simulador_trayectoria.py` |
 | Simulador web | El mismo modelo evaluado en el navegador, con el traslado físico entre sedes | `lib/stuffModel.ts`, `lib/simulator.ts` |
-| Evaluador de candidatos | Califica el arsenal completo de un pitcher de cualquier liga en el Harp Helú y lo ubica frente a la LMB | `lib/arsenal.ts`, `scripts/build-arsenal-ref.ts`, `pipeline/10_arsenal.py` |
+| Evaluador de candidatos | Califica el arsenal completo de un pitcher de cualquier liga en el Harp Helú y lo ubica frente a la LMB (28% menos error que suponer que rinde igual) | `lib/arsenal.ts`, `scripts/build-arsenal-ref.ts`, `pipeline/10_arsenal.py` |
 
 Resultados clave de la validación:
 
 | Prueba | Resultado |
 |---|---|
+| Supera al baseline nulo de la convocatoria (xRunValue promedio por conteo), pitchers no vistos | +0.29% de error cuadrático |
 | Correlación Stuff+ vs. valor de carrera real (pitcher × lanzamiento, pitchers no vistos) | 0.41 |
+| Park holdout: sin ver la categoría de altitud ni a los pitchers evaluados (promedio de las 3) | 0.27 (viendo la sede: 0.31) |
 | Igual, entrenando 2024–2025 y evaluando 2026 | 0.46 |
 | Estabilidad del Stuff+ de una temporada a la siguiente | 0.88 |
 | Con 25 lanzamientos: Stuff+ vs. resultado real para predecir el resto de la temporada | 0.37 vs. 0.16 |

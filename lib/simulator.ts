@@ -5,14 +5,20 @@ import { predictRV, toStuffPlus, type StuffModel, type Scale } from "./stuffMode
 export type PitchType = "Four-Seam" | "Sinker" | "Slider" | "Changeup" | "Curveball" | "Cutter";
 export type SedeKey = "No Altitude" | "Medium Altitude" | "Extreme Altitude" | "Harp Helu";
 
+export type SmoothField = "RelSpeed" | "ivb" | "hb_arm" | "SpinRate" | "spin_axis_m" | "Extension" | "RelHeight"
+  | "rel_side_arm" | "fb_relspeed" | "fb_ivb" | "fb_hb" | "fb_axis";
+
 export interface Sede { alt: number; h: number; label: string; rho: number; rho_ratio: number }
 export interface Meta {
   scale: Record<string, Scale>;
   sedes: Record<SedeKey, Sede>;
   physics: { p_magnus_global: number; p_magnus_tipo: Record<string, number> };
   percentiles_por_alt: Record<string, number[]>;
-  /** Variacion natural de ejecucion: la prediccion se promedia sobre estos desplazamientos */
-  smoothing: { sigma: { RelSpeed: number; ivb: number; hb_arm: number }; offsets: [number, number, number][] };
+  /**
+   * Variacion de ejecucion: la prediccion se promedia sobre estos desplazamientos (en desviaciones estandar),
+   * una columna por campo de `fields`. sigma = mitad de la variacion natural lanzamiento a lanzamiento.
+   */
+  smoothing: { fields: SmoothField[]; sigma: Record<SmoothField, number>; offsets: number[][] };
   /** Equivalencias de Stuff+ en el campo (ver pipeline/08_calibration.py) */
   calibration?: { por_10_puntos: { carreras_100: number; whiff_pct: number; csw_pct: number; contacto_fuerte_pct: number } };
 }
@@ -64,18 +70,27 @@ export function simulate(
   return sedes.map((k) => {
     const s = meta.sedes[k];
     const f = factor(meta, p.tipo, s.rho_ratio), ff = factor(meta, fbT, s.rho_ratio);
-    const ivb = ivb0 * f, hb = hb0 * f, fbIvb = fbIvb0 * ff, fbHb = fbHb0 * ff;
-    const { sigma, offsets } = meta.smoothing;
+    const ivb = ivb0 * f, hb = hb0 * f;
+    const { sigma: sg, offsets, fields } = meta.smoothing;
+    const c = Object.fromEntries(fields.map((campo, i) => [campo, i])) as Record<SmoothField, number>;
+    // la recta: si el lanzamiento ES la recta, su referencia es el propio lanzamiento (sin variar)
+    const fb0 = p.isFastball ? [p.RelSpeed, ivb0, hb0, p.spin_axis_m] : [fbVelo, fbIvb0, fbHb0, fbAxis];
     let rv = 0;
-    for (const [ov, oi, oh] of offsets) {
-      const v = p.RelSpeed + ov * sigma.RelSpeed;
-      const iv = (ivb0 + oi * sigma.ivb) * f, hh = (hb0 + oh * sigma.hb_arm) * f;
+    for (const o of offsets) {
+      const v = p.RelSpeed + o[c.RelSpeed] * sg.RelSpeed;
+      const iv = (ivb0 + o[c.ivb] * sg.ivb) * f, hh = (hb0 + o[c.hb_arm] * sg.hb_arm) * f;
+      const ax = p.spin_axis_m + o[c.spin_axis_m] * sg.spin_axis_m;
+      const fv = fb0[0] + o[c.fb_relspeed] * sg.fb_relspeed;
+      const fi = (fb0[1] + o[c.fb_ivb] * sg.fb_ivb) * ff, fh = (fb0[2] + o[c.fb_hb] * sg.fb_hb) * ff;
+      const fa = fb0[3] + o[c.fb_axis] * sg.fb_axis;
       rv += predictRV(model, {
-        RelSpeed: v, ivb: iv, hb_arm: hh, SpinRate: p.SpinRate, spin_axis_m: p.spin_axis_m,
-        Extension: p.Extension, RelHeight: p.RelHeight, rel_side_arm: p.rel_side_arm,
-        fb_relspeed: fbVelo, fb_ivb: fbIvb,
-        d_velo: v - fbVelo, d_ivb: iv - fbIvb, d_hb: hh - fbHb,
-        d_axis: wrap(p.spin_axis_m - fbAxis), alt: s.alt,
+        RelSpeed: v, ivb: iv, hb_arm: hh,
+        SpinRate: p.SpinRate + o[c.SpinRate] * sg.SpinRate, spin_axis_m: ax,
+        Extension: p.Extension + o[c.Extension] * sg.Extension,
+        RelHeight: p.RelHeight + o[c.RelHeight] * sg.RelHeight,
+        rel_side_arm: p.rel_side_arm + o[c.rel_side_arm] * sg.rel_side_arm,
+        fb_relspeed: fv, fb_ivb: fi, d_velo: v - fv, d_ivb: iv - fi, d_hb: hh - fh,
+        d_axis: wrap(ax - fa), alt: s.alt,
       });
     }
     rv /= offsets.length;

@@ -11,9 +11,10 @@ import json, os
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
+import simcore
 
 OUT = ".."  # raíz del repositorio
-for _d in ("public/data", "lib", "tests"): os.makedirs(f"{OUT}/{_d}", exist_ok=True)
+os.makedirs(f"{OUT}/public/data", exist_ok=True); os.makedirs(f"{OUT}/lib", exist_ok=True)
 booster = lgb.Booster(model_file="stuff_model.txt")
 dump = booster.dump_model()
 FEATS = dump["feature_names"]
@@ -113,8 +114,9 @@ out = {
     "calibration": json.load(open("calibration.json")),
     "levers": json.load(open("levers.json")),
     "projection_validation": json.load(open("projection_validation.json")),
-    "smoothing": {"sigma": {"RelSpeed": 0.6, "ivb": 1.2, "hb_arm": 1.2},
-                  "offsets": np.round(np.load("halton_offsets.npy"), 4).tolist()},
+    "robustez": json.load(open("robustez.json")),
+    "contacto": json.load(open("contacto.json")),
+    "smoothing": {"fields": simcore.FIELDS, "sigma": simcore.SIGMA, "offsets": simcore.make_offsets().tolist()},
     "dataset": {"lanzamientos": int(len(d)), "pitchers": int(d.pitcher_anon_id.nunique()),
                 "juegos": int(d.game_anon_id.nunique()), "temporadas": sorted(int(y) for y in d.year.unique())},
 }
@@ -167,29 +169,7 @@ print(f"arsenal.json (con campos del simulador): {os.path.getsize(f'{OUT}/public
 
 # ------------------------------------------------------------- casos de prueba para la interfaz
 def ref_sim(p, measuredAt="No Altitude"):
-    S = out["sedes"]; Pm = out["physics"]["p_magnus_tipo"]
-    fac = lambda t, r: r ** Pm.get(t, out["physics"]["p_magnus_global"])
-    r0 = S[measuredAt]["rho_ratio"]; fbT = p["tipo"] if p["isFastball"] else p["fbTipo"]
-    ivb0, hb0 = p["ivb"] / fac(p["tipo"], r0), p["hb_arm"] / fac(p["tipo"], r0)
-    fi0 = (p["ivb"] if p["isFastball"] else p["fb_ivb"]) / fac(fbT, r0)
-    fh0 = (p["hb_arm"] if p["isFastball"] else p["fb_hb"]) / fac(fbT, r0)
-    fv = p["RelSpeed"] if p["isFastball"] else p["fb_relspeed"]
-    fa = p["spin_axis_m"] if p["isFastball"] else p["fb_axis"]
-    res = {}
-    sg, OFF = out["smoothing"]["sigma"], out["smoothing"]["offsets"]
-    for k in ["No Altitude", "Medium Altitude", "Harp Helu"]:
-        f, ff = fac(p["tipo"], S[k]["rho_ratio"]), fac(fbT, S[k]["rho_ratio"])
-        xs = []
-        for ov, oi, oh in OFF:
-            v = p["RelSpeed"] + ov * sg["RelSpeed"]; ivb = (ivb0 + oi * sg["ivb"]) * f; hb = (hb0 + oh * sg["hb_arm"]) * f
-            xs.append({**{c: p[c] for c in ["SpinRate", "spin_axis_m", "Extension", "RelHeight", "rel_side_arm"]},
-                 "RelSpeed": v, "ivb": ivb, "hb_arm": hb, "fb_relspeed": fv, "fb_ivb": fi0 * ff, "d_velo": v - fv,
-                 "d_ivb": ivb - fi0 * ff, "d_hb": hb - fh0 * ff, "d_axis": ((p["spin_axis_m"] - fa + 180) % 360) - 180,
-                 "alt": S[k]["alt"]})
-        rv = booster.predict(pd.DataFrame(xs)[FEATS]).mean()
-        sc_ = out["scale"][str(S[k]["alt"])]
-        res[k] = round(float(100 + 10 * (sc_["mean"] - rv) / sc_["std"]), 3)
-    return res
+    return {k: round(v, 3) for k, v in simcore.simulate(booster, out, p, measuredAt).items()}
 FB = out["defaults"]["_fastball"]
 cases = []
 for t in ["Four-Seam", "Slider", "Changeup"]:

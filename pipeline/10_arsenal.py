@@ -14,12 +14,12 @@ import json, os
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
+import simcore
 from sklearn.model_selection import GroupKFold
 
 OUT = os.environ.get("OUT", "..")
 meta = json.load(open(f"{OUT}/public/data/meta.json")); F = meta["features"]
 S = meta["sedes"]; Pm = meta["physics"]["p_magnus_tipo"]; pg = meta["physics"]["p_magnus_global"]
-SG = meta["smoothing"]["sigma"]; OFF = np.array(meta["smoothing"]["offsets"])
 fac = lambda t, r: r ** Pm.get(t, pg)
 
 def recta(pitches):
@@ -30,6 +30,8 @@ def recta(pitches):
     return max(range(len(pitches)), key=lambda i: pitches[i]["RelSpeed"])
 
 def evaluar(booster, scale, a, sedes=("No Altitude", "Medium Altitude", "Harp Helu")):
+    """Equivalente a evaluateArsenal() de lib/arsenal.ts (usa el mismo nucleo, simcore)."""
+    m = {**meta, "scale": scale}
     tot = sum(max(0, p["uso"]) for p in a["pitches"])
     w = [max(0, p["uso"]) / tot if tot > 0 else 1 / len(a["pitches"]) for p in a["pitches"]]
     mar = []
@@ -37,29 +39,18 @@ def evaluar(booster, scale, a, sedes=("No Altitude", "Medium Altitude", "Harp He
         f = fac(p["tipo"], S[p.get("measuredAt", a["measuredAt"])]["rho_ratio"])
         mar.append({**p, "ivb": p["ivb"] / f, "hb_arm": p["hb_arm"] / f})
     i_fb = recta(a["pitches"]); fb = mar[i_fb]
+    offs = np.asarray(meta["smoothing"]["offsets"])
     res = {"pitches": [], "stuff": {}}
-    rows, keys = [], []
     for i, p in enumerate(mar):
-        ext = p.get("Extension", a["Extension"]); hgt = p.get("RelHeight", a["RelHeight"]); side = p.get("rel_side_arm", a["rel_side_arm"])
-        for s in sedes:
-            f = fac(p["tipo"], S[s]["rho_ratio"]); ff = fac(fb["tipo"], S[s]["rho_ratio"])
-            fbv, fbi, fbh, fba = fb["RelSpeed"], fb["ivb"] * ff, fb["hb_arm"] * ff, fb["spin_axis_m"]
-            for ov, oi, oh in OFF:
-                v = p["RelSpeed"] + ov * SG["RelSpeed"]; iv = (p["ivb"] + oi * SG["ivb"]) * f; hh = (p["hb_arm"] + oh * SG["hb_arm"]) * f
-                rows.append([v, iv, hh, p["SpinRate"], p["spin_axis_m"], ext, hgt, side,
-                             fbv, fbi, v - fbv, iv - fbi, hh - fbh, ((p["spin_axis_m"] - fba + 180) % 360) - 180, S[s]["alt"]])
-                keys.append((i, s))
-    X = pd.DataFrame(rows, columns=["RelSpeed", "ivb", "hb_arm", "SpinRate", "spin_axis_m", "Extension", "RelHeight",
-                                    "rel_side_arm", "fb_relspeed", "fb_ivb", "d_velo", "d_ivb", "d_hb", "d_axis", "alt"])[F]
-    pred = pd.Series(booster.predict(X)).groupby(pd.MultiIndex.from_tuples(keys)).mean()
-    for i, p in enumerate(a["pitches"]):
-        st = {}
-        for s in sedes:
-            sc = scale[str(S[s]["alt"])]
-            st[s] = 100 + 10 * (sc["mean"] - pred[(i, s)]) / sc["std"]
-        res["pitches"].append({"tipo": p["tipo"], "stuff": st})
-    for s in sedes:
-        res["stuff"][s] = sum(w[i] * res["pitches"][i]["stuff"][s] for i in range(len(w)))
+        q = {**p, "Extension": p.get("Extension", a["Extension"]), "RelHeight": p.get("RelHeight", a["RelHeight"]),
+             "rel_side_arm": p.get("rel_side_arm", a["rel_side_arm"]), "isFastball": i == i_fb, "fbTipo": fb["tipo"],
+             "fb_relspeed": fb["RelSpeed"], "fb_ivb": fb["ivb"], "fb_hb": fb["hb_arm"], "fb_axis": fb["spin_axis_m"]}
+        X = pd.concat([simcore.feature_rows(m, q, s_, offs) for s_ in sedes], ignore_index=True)
+        pr = booster.predict(X).reshape(len(sedes), -1).mean(axis=1)
+        res["pitches"].append({"tipo": p["tipo"], "stuff": {s_: float(simcore.stuff_plus(m, pr[j], S[s_]["alt"]))
+                                                             for j, s_ in enumerate(sedes)}})
+    for s_ in sedes:
+        res["stuff"][s_] = sum(w[i] * res["pitches"][i]["stuff"][s_] for i in range(len(w)))
     res["recta"] = a["pitches"][i_fb]["tipo"]
     return res
 

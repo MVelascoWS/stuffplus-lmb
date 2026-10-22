@@ -148,12 +148,17 @@ const CODE_TIPO = Object.fromEntries(Object.entries(TIPO_CODE).map(([k, v]) => [
 const SEDE_CODE: Record<SedeKey, string> = { "No Altitude": "0", "Medium Altitude": "1", "Extreme Altitude": "2", "Harp Helu": "H" };
 const CODE_SEDE = Object.fromEntries(Object.entries(SEDE_CODE).map(([k, v]) => [v, k])) as Record<string, SedeKey>;
 const r1 = (x: number) => Math.round(x * 10) / 10;
+const r2 = (x: number) => Math.round(x * 100) / 100;
 
-/** Codifica el arsenal en un texto corto para un parametro de URL (?a=...). */
+/**
+ * Codifica el arsenal en un texto corto para un parametro de URL (?a=...). Velocidad, movimiento y liberacion
+ * con dos decimales; uso con uno; giro y eje enteros. Reabrir el link cambia la calificacion menos de medio punto
+ * (lo verifica scripts/check-fixtures.ts con todos los pitchers de la liga).
+ */
 export function encodeArsenal(a: ArsenalInput): string {
-  const head = [a.mano === "Left" ? "L" : "R", SEDE_CODE[a.measuredAt], r1(a.Extension), r1(a.RelHeight), r1(a.rel_side_arm)].join(",");
+  const head = [a.mano === "Left" ? "L" : "R", SEDE_CODE[a.measuredAt], r2(a.Extension), r2(a.RelHeight), r2(a.rel_side_arm)].join(",");
   const body = a.pitches.map((p) => {
-    const f = [TIPO_CODE[p.tipo], r1(p.uso), r1(p.RelSpeed), r1(p.ivb), r1(p.hb_arm), Math.round(p.SpinRate), Math.round(p.spin_axis_m)];
+    const f = [TIPO_CODE[p.tipo], r1(p.uso), r2(p.RelSpeed), r2(p.ivb), r2(p.hb_arm), Math.round(p.SpinRate), Math.round(p.spin_axis_m)];
     if (p.measuredAt && p.measuredAt !== a.measuredAt) f.push(SEDE_CODE[p.measuredAt] as unknown as number);
     return f.join(",");
   });

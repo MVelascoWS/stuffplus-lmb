@@ -43,7 +43,7 @@ rng = np.random.default_rng(7)
 pits = d.pitcher_anon_id.unique(); test_p = set(rng.choice(pits, len(pits) // 5, replace=False))
 te = d.pitcher_anon_id.isin(test_p); tr, ts = d[~te], d[te].copy()
 LADDER = {
-    "B0 promedio por conteo (sin stuff)": None,
+    "B0 promedio general (sin stuff)": None,
     "B1 solo velocidad": ["RelSpeed"],
     "B2 velocidad + movimiento + spin": ["RelSpeed", "ivb", "hb_arm", "SpinRate", "spin_axis_m"],
     "B3 + liberacion + arsenal (diferenciales)": [f for f in FULL if f != "alt"],
