@@ -8,6 +8,10 @@ import { Card, CardTitle, Legend, PageIntro } from "@/components/ui";
 import type { DashboardMeta } from "@/lib/data";
 import { TIPO_CORTO, TIPO_LABEL, fmt0, fmt2, fmtMeters, fmtPct, fmtSigned } from "@/lib/format";
 import type { PitchType } from "@/lib/simulator";
+import { conConvocatoria } from "@/types/convocatoria";
+import { Contacto } from "./Contacto";
+import { Hipotesis } from "./Hipotesis";
+import { Rodados } from "./Rodados";
 
 const MAIN = "#b91c1c";
 const REF = "#a8a29e";
@@ -24,7 +28,15 @@ export function Physics() {
               empujar y el lanzamiento pierde movimiento. Aquí se mide cuánto pierde cada tipo, por qué pierde más de lo
               que la densidad del aire explicaría por sí sola y qué tan bien se sostiene esa ley fuera de la muestra.
             </p>
+            <p>
+              Primero, el veredicto de las cuatro hipótesis de la convocatoria y lo que pasa cuando batean la pelota en
+              altitud.
+            </p>
           </PageIntro>
+          <Hipotesis meta={conConvocatoria(meta)} />
+          <Contacto meta={conConvocatoria(meta)} />
+          <Rodados meta={conConvocatoria(meta)} />
+          <h2 className="mb-4 mt-10 text-lg font-semibold text-neutral-900">La física de la pérdida de movimiento</h2>
           <Conclusions meta={meta} />
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
             <LossChart meta={meta} />
