@@ -11,15 +11,22 @@ import { equivalencia } from "./equivalencias";
  * Cambios pequeños que más suben el Stuff+ de este tipo de lanzamiento en el Harp Helú.
  * Depende solo del tipo: son efectos promedio sobre lanzamientos reales, no sobre los valores capturados.
  */
-export function LeversPanel({ meta, tipo }: { meta: MetaConResultados; tipo: PitchType }) {
+export function LeversPanel({ meta, tipo, title, soloUtiles = false }: {
+  meta: MetaConResultados;
+  tipo: PitchType;
+  /** título alterno; por defecto, la pregunta del simulador */
+  title?: string;
+  /** oculta los cambios que no ayudan */
+  soloUtiles?: boolean;
+}) {
   const list = useMemo(() => levers(meta, tipo, "Harp Helu"), [meta, tipo]);
   const helpful = list.filter((l) => l.ayuda);
-  const others = list.filter((l) => !l.ayuda);
+  const others = soloUtiles ? [] : list.filter((l) => !l.ayuda);
 
   return (
     <Card>
       <CardTitle sub={`Cambios pequeños para ${TIPO_LABEL[tipo].toLowerCase()}, ordenados de mayor a menor efecto en puntos de Stuff+.`}>
-        ¿Qué mover para rendir más en el Harp Helú?
+        {title ?? "¿Qué mover para rendir más en el Harp Helú?"}
       </CardTitle>
       {helpful.length > 0 ? (
         <ol className="space-y-3">

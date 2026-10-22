@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/simulador/", label: "Simulador" },
   { href: "/pitchers/", label: "Pitchers" },
+  { href: "/candidatos/", label: "Evaluar candidato" },
   { href: "/fisica/", label: "Física" },
   { href: "/modelo/", label: "Modelo" },
   { href: "/reporte/", label: "Reporte" },
