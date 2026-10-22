@@ -3,11 +3,12 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useCalculo } from "@/components/calculo/useCalculo";
-import { WithData } from "@/components/DataProvider";
-import { Card } from "@/components/ui";
+import { useDashboardData } from "@/components/DataProvider";
+import { IcoLink, IcoMas } from "@/components/consola/Iconos";
+import { Cargando, ErrorDatos, Vista } from "@/components/consola/Vista";
 import { decodeArsenal, encodeArsenal, type ArsenalInput } from "@/lib/arsenal";
 import type { DashboardData } from "@/lib/data";
-import { SEDE_CORTA, fmt0, fmtStuff } from "@/lib/format";
+import { fmt0 } from "@/lib/format";
 import { conResultados } from "@/types/resultados";
 import { ArsenalEditor } from "./ArsenalEditor";
 import { ArsenalResultView } from "./ArsenalResultView";
@@ -15,24 +16,18 @@ import { Comparison, LETRAS, type Comparado, type Letra } from "./Comparison";
 import { draftDeLaLiga, ejemplo, toInput, usoTipico, withIds, type Draft } from "./draft";
 import { useCandidatosData, type CandidatosData } from "./useCandidatosData";
 
+const TITULO = "Evaluar candidato";
+const DESCRIPCION = "Califica el arsenal completo de un pitcher de cualquier liga en el Harp Helú y ubícalo frente a la LMB.";
+
 export function Candidatos() {
   const params = useSearchParams();
+  const estado = useDashboardData();
   const extra = useCandidatosData();
-  return (
-    <WithData>
-      {(data) => {
-        if (extra.error) {
-          return (
-            <p className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-              No se pudo cargar la referencia de la liga: {extra.error}. Recarga la página para intentar de nuevo.
-            </p>
-          );
-        }
-        if (!extra.data) return <p className="animate-pulse py-12 text-center text-sm text-neutral-500">Cargando datos…</p>;
-        return <Evaluador data={data} extra={extra.data} params={params} />;
-      }}
-    </WithData>
-  );
+  const error = estado.status === "error" ? estado.message : extra.error;
+  if (estado.status !== "ready" || !extra.data) {
+    return <Vista titulo={TITULO} descripcion={DESCRIPCION}>{error ? <ErrorDatos mensaje={error} /> : <Cargando />}</Vista>;
+  }
+  return <Evaluador data={estado.data} extra={extra.data} params={params} />;
 }
 
 interface Inicial { draft: Draft; origen: string | null; comparados: Comparado[] }
@@ -122,67 +117,37 @@ function Evaluador({ data, extra, params }: { data: DashboardData; extra: Candid
   };
 
   return (
-    <div className="pb-16 lg:pb-0">
-      <div className="mb-6 flex flex-col gap-3 rounded-lg border border-neutral-200 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
-        <label className="block text-sm text-neutral-800 sm:max-w-xs sm:flex-1">
-          Cargar un pitcher de la LMB como ejemplo
+    <Vista
+      titulo={TITULO}
+      descripcion={DESCRIPCION}
+      acciones={
+        <>
           <select
-            value={origen ?? ""}
-            onChange={(e) => e.target.value && cargarPitcher(e.target.value)}
-            className="mt-1 block w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:border-accent focus:outline-none"
+            className="ctl w-auto max-w-full" aria-label="Cargar pitcher de la LMB"
+            value={origen ?? ""} onChange={(e) => e.target.value && cargarPitcher(e.target.value)}
           >
-            <option value="">Elegir pitcher anónimo…</option>
+            <option value="">Cargar pitcher de la LMB…</option>
             {ids.map((id) => <option key={id} value={id}>{id}</option>)}
           </select>
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button" onClick={agregar} disabled={!libre}
-            className="rounded border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-800 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {libre ? `Agregar a la comparación (${libre})` : "Comparación llena"}
+          <button type="button" className="btn" onClick={agregar} disabled={!libre}>
+            <IcoMas />{libre ? `Agregar a la comparación (${libre})` : "Comparación llena"}
           </button>
-          <button type="button" onClick={copiar} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800">
-            {copiado ? "Link copiado" : "Copiar link"}
-          </button>
-        </div>
-      </div>
-
+          <button type="button" className="btn prim" onClick={copiar}><IcoLink />{copiado ? "Link copiado" : "Copiar link"}</button>
+        </>
+      }
+    >
       <ArsenalEditor draft={draft} meta={data.meta} usoTipico={uso} onChange={edit} />
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
-        <ArsenalResultView result={result} meta={meta} minN={minN} />
-        <div className="min-w-0 space-y-6">
-          {comparados.length > 0 ? (
-            comparacion.valor && !comparacion.calculando ? (
-              <Comparison items={comparados} results={comparacion.valor} onRemove={quitar} onEdit={editarComparado} />
-            ) : (
-              <Card><p className="animate-pulse text-sm text-neutral-500">Calculando la comparación…</p></Card>
-            )
-          ) : (
-            <Card>
-              <p className="text-sm text-neutral-600">
-                Usa “Agregar a la comparación” para guardar este arsenal y comparar hasta tres candidatos lado a lado.
-              </p>
-            </Card>
-          )}
-        </div>
-      </div>
-
-      <ValidationNote v={extra.validation} />
-
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-neutral-200 bg-white/95 px-4 py-2 backdrop-blur lg:hidden">
-        <p className="mx-auto max-w-6xl text-center text-sm text-neutral-700">
-          {SEDE_CORTA["Harp Helu"]}:{" "}
-          <span className="text-lg font-semibold tabular-nums text-neutral-900">{fmtStuff(result.stuff["Harp Helu"])}</span>{" "}
-          · percentil {fmt0(result.percentil["Harp Helu"])}
-        </p>
-      </div>
-    </div>
+      <ArsenalResultView result={result} meta={meta} minN={minN} pie={<NotaValidacion v={extra.validation} />} />
+      <Comparison
+        items={comparados}
+        results={comparacion.valor && !comparacion.calculando ? comparacion.valor : null}
+        onRemove={quitar} onEdit={editarComparado} nLiga={extra.arsenalRef.n}
+      />
+    </Vista>
   );
 }
 
-function ValidationNote({ v }: { v: CandidatosData["validation"] }) {
+function NotaValidacion({ v }: { v: CandidatosData["validation"] }) {
   const real = v.vs_resultado_real;
   const [lo] = real.mejora_ic95;
   let contraReal: string;
@@ -194,10 +159,10 @@ function ValidationNote({ v }: { v: CandidatosData["validation"] }) {
     contraReal = `Contra las carreras reales apunta en la misma dirección, pero con ${fmt0(v.n_pitchers)} pitchers la mejora todavía no es estadísticamente concluyente.`;
   }
   return (
-    <p className="mt-8 border-t border-neutral-200 pt-4 text-xs leading-relaxed text-neutral-600">
+    <>
       Con pitchers que el modelo no vio, el simulador anticipa el Stuff+ de su arsenal en altitud con{" "}
       {fmt0(v.reduccion_error_pct)}% menos error que suponer que rinde igual. {contraReal} Stuff+ no mide comando: para
       candidatos con muchos lanzamientos registrados, véalo junto con sus resultados.
-    </p>
+    </>
   );
 }
