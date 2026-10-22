@@ -7,7 +7,7 @@ out/
 next-env.d.ts
 
 # dataset original (confidencial, no se publica)
-data/
+/data/
 *.parquet
 *.pkl
 *.rds
