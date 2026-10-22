@@ -1,14 +1,14 @@
 "use client";
 
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Card, CardTitle } from "@/components/ui";
+import { Lectura, Panel } from "@/components/consola/Panel";
 import { TIPO_LABEL, fmt0, fmt1, fmt2, fmtMeters, fmtSigned } from "@/lib/format";
 import type { PitchType } from "@/lib/simulator";
 import type { MetaConResultados } from "@/types/resultados";
 
-const MAIN = "#b91c1c";
-const REF = "#a8a29e";
-const AXIS = { fontSize: 12, fill: "#525252" };
+const MAIN = "var(--tinta)";
+const REF = "var(--grafito)";
+const AXIS = { fontSize: 11, fill: "var(--grafito)" };
 
 /** Ancla para enlazar esta sección desde otras vistas. */
 export const PROJECTION_ANCHOR = "validacion-proyeccion";
@@ -45,25 +45,31 @@ export function ProjectionCheck({ meta }: { meta: MetaConResultados }) {
   const tipos = Object.entries(v.por_tipo).sort((a, b) => b[1].n - a[1].n) as [PitchType, (typeof v.por_tipo)[string]][];
 
   return (
-    <Card className="mt-6">
-      <div id={PROJECTION_ANCHOR} className="scroll-mt-6" />
-      <CardTitle>¿El simulador predice cómo rinde un pitcher en altitud?</CardTitle>
-      <p className="max-w-3xl text-sm leading-relaxed text-neutral-700">
+    <Panel
+      ancho={12}
+      id={PROJECTION_ANCHOR}
+      className="scroll-mt-24"
+      titulo="¿El simulador predice cómo rinde un pitcher en altitud?"
+      meta={`${fmt0(v.n_pitchers)} pitchers que el modelo nunca vio`}
+      pie={<>“Igual”: suponer que el pitcher rinde en altitud lo mismo que a nivel del mar. El modelo de Stuff+ nunca vio a estos pitchers; los exponentes físicos (uno por tipo de lanzamiento) sí se estimaron con todos. Las correlaciones contra el resultado real son menores que contra Stuff+ porque el resultado incluye ubicación, bateador y azar.</>}
+    >
+      <Lectura>
+        Con solo sus lanzamientos a nivel del mar, el simulador anticipa el rendimiento de un pitcher en altitud tan bien
+        como si ya lo hubiéramos visto lanzar allá.
+      </Lectura>
+      <div className="pb">
+      <p className="m-0 max-w-3xl text-[14px] leading-relaxed">
         Tomamos a {fmt0(v.n_pitchers)} pitchers que lanzaron el mismo tipo de lanzamiento a nivel del mar y en altitud
         extrema ({fmt0(v.n)} combinaciones pitcher × lanzamiento). Para cada uno se entrenó el modelo sin ese pitcher:{" "}
         <strong className="font-semibold">el modelo nunca lo vio</strong>. Sus lanzamientos a nivel del mar se trasladaron
         a la altitud promedio de las sedes extremas ({fmtMeters(ext.h)}) y la proyección se comparó con lo que realmente
         pasó allá.
       </p>
-      <p className="my-5 rounded-lg border-l-4 border-accent bg-accent-soft p-4 text-base leading-relaxed text-neutral-900">
-        Con solo sus lanzamientos a nivel del mar, el simulador anticipa el rendimiento de un pitcher en altitud tan bien
-        como si ya lo hubiéramos visto lanzar allá.
-      </p>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="mt-5 grid gap-8 lg:grid-cols-2">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-neutral-900">Error medio al anticipar su Stuff+ en altitud</h3>
-          <p className="mb-3 text-xs text-neutral-600">Puntos de Stuff+; menos es mejor.</p>
+          <h3 className="text-sm font-semibold ">Error medio al anticipar su Stuff+ en altitud</h3>
+          <p className="mb-3 text-xs text-grafito">Puntos de Stuff+; menos es mejor.</p>
           <HBars
             digits={1}
             rows={[
@@ -71,16 +77,16 @@ export function ProjectionCheck({ meta }: { meta: MetaConResultados }) {
               { name: "Simulador", v: v.proyeccion.mae, main: true },
             ]}
           />
-          <p className="mt-3 text-sm text-neutral-800">
-            <strong className="text-accent">{fmt0(v.reduccion_error_pct)}% menos error</strong> (intervalo de 95%:{" "}
+          <p className="mt-3 text-sm ">
+            <strong>{fmt0(v.reduccion_error_pct)}% menos error</strong> (intervalo de 95%:{" "}
             {fmt0(lo)}% a {fmt0(hi)}%). Además anticipa cuánto sube o baja cada pitcher: el cambio proyectado y el
             observado tienen correlación {fmt2(v.cambio_corr)}.
           </p>
         </div>
 
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-neutral-900">Contra el resultado real</h3>
-          <p className="mb-3 text-xs text-neutral-600">
+          <h3 className="text-sm font-semibold ">Contra el resultado real</h3>
+          <p className="mb-3 text-xs text-grafito">
             Correlación con las carreras que esos lanzamientos realmente permitieron en altitud; más es mejor.
           </p>
           <HBars
@@ -91,7 +97,7 @@ export function ProjectionCheck({ meta }: { meta: MetaConResultados }) {
               { name: "Stuff+ ya medido en altitud", v: real.techo, main: false },
             ]}
           />
-          <p className="mt-3 text-sm text-neutral-800">
+          <p className="mt-3 text-sm ">
             La proyección iguala al Stuff+ de los lanzamientos que de hecho tiraron en altitud, el techo de esta prueba.
             La mejora sobre suponer que rinde igual es significativa (intervalo de 95%: {fmtSigned(real.mejora_ic95[0], 3)} a{" "}
             {fmtSigned(real.mejora_ic95[1], 3)}).
@@ -99,31 +105,31 @@ export function ProjectionCheck({ meta }: { meta: MetaConResultados }) {
         </div>
       </div>
 
-      <h3 className="mt-8 text-sm font-semibold text-neutral-900">La mejora se sostiene en todos los tipos</h3>
+      <h3 className="mt-8 text-sm font-semibold ">La mejora se sostiene en todos los tipos</h3>
       <div data-scroll-x className="mt-2 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-neutral-200 text-xs text-neutral-600">
+        <table className="tabla">
+          <thead>
             <tr>
-              <th scope="col" className="py-2 pr-2 text-left font-medium">Lanzamiento</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">Comb.</th>
-              <th scope="col" className="px-2 py-2 text-right font-medium">
+              <th scope="col">Lanzamiento</th>
+              <th scope="col" className="n">Comb.</th>
+              <th scope="col" className="n">
                 Error <span className="block font-normal sm:inline">igual → simulador</span>
               </th>
-              <th scope="col" className="py-2 pl-2 text-right font-medium">
+              <th scope="col" className="n">
                 Correlación <span className="block font-normal sm:inline">igual → simulador</span>
               </th>
             </tr>
           </thead>
           <tbody>
             {tipos.map(([tipo, t]) => (
-              <tr key={tipo} className="border-b border-neutral-100 last:border-0">
-                <td className="py-2 pr-2 text-neutral-900">{TIPO_LABEL[tipo] ?? tipo}</td>
-                <td className="px-2 py-2 text-right tabular-nums text-neutral-600">{fmt0(t.n)}</td>
-                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">
-                  <span className="text-neutral-500">{fmt1(t.ingenuo.mae)}</span> → <strong className="font-semibold">{fmt1(t.proyeccion.mae)}</strong>
+              <tr key={tipo}>
+                <td>{TIPO_LABEL[tipo] ?? tipo}</td>
+                <td className="n tenue">{fmt0(t.n)}</td>
+                <td className="n whitespace-nowrap">
+                  <span className="text-grafito">{fmt1(t.ingenuo.mae)}</span> → <strong className="font-semibold">{fmt1(t.proyeccion.mae)}</strong>
                 </td>
-                <td className="whitespace-nowrap py-2 pl-2 text-right tabular-nums">
-                  <span className="text-neutral-500">{fmt2(t.ingenuo.corr)}</span> → <strong className="font-semibold">{fmt2(t.proyeccion.corr)}</strong>
+                <td className="n whitespace-nowrap">
+                  <span className="text-grafito">{fmt2(t.ingenuo.corr)}</span> → <strong className="font-semibold">{fmt2(t.proyeccion.corr)}</strong>
                 </td>
               </tr>
             ))}
@@ -131,11 +137,7 @@ export function ProjectionCheck({ meta }: { meta: MetaConResultados }) {
         </table>
       </div>
 
-      <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-        “Igual”: suponer que el pitcher rinde en altitud lo mismo que a nivel del mar. El modelo de Stuff+ nunca vio a
-        estos pitchers; los exponentes físicos (uno por tipo de lanzamiento) sí se estimaron con todos. Las correlaciones
-        contra el resultado real son menores que contra Stuff+ porque el resultado incluye ubicación, bateador y azar.
-      </p>
-    </Card>
+      </div>
+    </Panel>
   );
 }

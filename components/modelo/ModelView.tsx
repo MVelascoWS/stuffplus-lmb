@@ -3,8 +3,9 @@
 import {
   Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
-import { WithData } from "@/components/DataProvider";
-import { Card, CardTitle, Legend, PageIntro } from "@/components/ui";
+import { useDashboardData } from "@/components/DataProvider";
+import { Panel } from "@/components/consola/Panel";
+import { Cargando, ErrorDatos, Vista } from "@/components/consola/Vista";
 import type { DashboardData } from "@/lib/data";
 import { fmt0, fmt1, fmt2 } from "@/lib/format";
 import { conConvocatoria } from "@/types/convocatoria";
@@ -13,9 +14,12 @@ import { FieldMeaning } from "./FieldMeaning";
 import { ProjectionCheck } from "./ProjectionCheck";
 import { Validaciones } from "./Validaciones";
 
-const MAIN = "#b91c1c";
-const REF = "#a8a29e";
-const AXIS = { fontSize: 12, fill: "#525252" };
+// Gráficas: serie principal en tinta y la comparación en grafito.
+const MAIN = "var(--tinta)";
+const REF = "var(--grafito)";
+const AXIS = { fontSize: 11, fill: "var(--grafito)" };
+const TITULO = "Modelo";
+const DESCRIPCION = "Cómo se construyó Stuff+ y las pruebas que lo sostienen, con datos que el modelo no vio.";
 
 /** Nombres legibles de las variables del modelo. */
 const FEATURE_LABEL: Record<string, string> = {
@@ -45,29 +49,28 @@ const LADDER_LABEL: Record<string, string> = {
 };
 
 export function ModelView() {
+  const estado = useDashboardData();
+  if (estado.status !== "ready") {
+    return (
+      <Vista titulo={TITULO} descripcion={DESCRIPCION}>
+        {estado.status === "error" ? <ErrorDatos mensaje={estado.message} /> : <Cargando />}
+      </Vista>
+    );
+  }
+  const data = estado.data;
   return (
-    <WithData>
-      {(data) => (
-        <>
-          <PageIntro title="Cómo se construyó la métrica">
-            <p>
-              Stuff+ califica qué tan difícil de batear es un lanzamiento solo por cómo sale de la mano y cómo se mueve.
-              No mira dónde cayó ni qué pasó en la jugada. Estas son las piezas y las pruebas que la sostienen.
-            </p>
-          </PageIntro>
-          <Steps data={data} />
-          <FieldMeaning calibration={conResultados(data.meta).calibration} />
-          <ProjectionCheck meta={conResultados(data.meta)} />
-          <Validaciones meta={conConvocatoria(data.meta)} />
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            <SmallSample data={data} />
-            <Ladder data={data} />
-            <YearToYear data={data} />
-            <Shap data={data} />
-          </div>
-        </>
-      )}
-    </WithData>
+    <Vista titulo={TITULO} descripcion={DESCRIPCION}>
+      <Steps data={data} />
+      <Validaciones meta={conConvocatoria(data.meta)} />
+      <ProjectionCheck meta={conResultados(data.meta)} />
+      <FieldMeaning calibration={conResultados(data.meta).calibration} />
+      <div className="c5 grid min-w-0 gap-5">
+        <Ladder data={data} />
+        <YearToYear data={data} />
+      </div>
+      <SmallSample data={data} />
+      <Shap data={data} />
+    </Vista>
   );
 }
 
@@ -109,15 +112,20 @@ function Steps({ data }: { data: DashboardData }) {
     },
   ];
   return (
-    <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {steps.map((s, i) => (
-        <li key={s.title} className="rounded-lg border border-neutral-200 bg-white p-4">
-          <span className="text-xs font-semibold text-accent">Paso {i + 1}</span>
-          <h2 className="mt-1 font-semibold text-neutral-900">{s.title}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-700">{s.text}</p>
-        </li>
-      ))}
-    </ol>
+    <Panel ancho={12} titulo="Cómo se construyó la métrica" meta="Cinco pasos, en orden">
+      <ol className="m-0 grid list-none p-0 md:grid-cols-5">
+        {steps.map((st, i) => (
+          <li key={st.title} className="relative border-b border-linea px-[18px] py-4 last:border-b-0 md:border-b-0 md:border-l md:first:border-l-0">
+            <div className="flex items-center gap-3">
+              <span className="num flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tinta text-[20px] font-extrabold text-papel">{i + 1}</span>
+              <h3 className="m-0 text-[15px] font-bold">{st.title}</h3>
+              {i < steps.length - 1 && <span aria-hidden="true" className="ml-auto hidden text-grafito md:inline">→</span>}
+            </div>
+            <p className="m-0 mt-3 text-[13px] leading-relaxed text-grafito">{st.text}</p>
+          </li>
+        ))}
+      </ol>
+    </Panel>
   );
 }
 
@@ -126,31 +134,30 @@ function SmallSample({ data }: { data: DashboardData }) {
     .sort((a, b) => a.N - b.N)
     .map((s) => ({ ...s, name: `${fmt0(s.N)} lanz.` }));
   return (
-    <Card>
-      <CardTitle sub="Con una muestra de N lanzamientos de un pitcher, ¿qué predice mejor el resto de su temporada: su Stuff+ o su resultado real? Correlación con el valor de carrera posterior.">
-        Stuff+ sirve desde los primeros lanzamientos
-      </CardTitle>
+    <Panel ancho={5} titulo="Stuff+ sirve desde los primeros lanzamientos" meta="Correlación con el resto de la temporada, según cuántos lanzamientos se han visto">
+      <div className="pb">
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows} margin={{ top: 16, right: 4, bottom: 0, left: -16 }} barGap={2}>
             <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
-            <XAxis dataKey="name" tick={AXIS} stroke="#d4d4d4" />
-            <YAxis tick={AXIS} stroke="#d4d4d4" domain={[0, "auto"]} tickFormatter={(v: number) => fmt1(v)} />
+            <XAxis dataKey="name" tick={AXIS} stroke="var(--linea)" />
+            <YAxis tick={AXIS} stroke="var(--linea)" domain={[0, "auto"]} tickFormatter={(v: number) => fmt1(v)} />
             <Tooltip
-              cursor={{ fill: "#f5f5f5" }}
+              cursor={{ fill: "var(--lienzo)" }}
               formatter={(v, key) => [fmt2(Number(v)), key === "stuff" ? "Stuff+" : "Resultado real"]}
             />
             <Bar dataKey="stuff" fill={MAIN} radius={[4, 4, 0, 0]} isAnimationActive={false}>
-              <LabelList dataKey="stuff" position="top" formatter={(v) => fmt2(Number(v))} style={{ fontSize: 11, fill: "#404040" }} />
+              <LabelList dataKey="stuff" position="top" formatter={(v) => fmt2(Number(v))} style={{ fontSize: 11, fill: "var(--tinta)" }} />
             </Bar>
             <Bar dataKey="rv" fill={REF} radius={[4, 4, 0, 0]} isAnimationActive={false}>
-              <LabelList dataKey="rv" position="top" formatter={(v) => fmt2(Number(v))} style={{ fontSize: 11, fill: "#404040" }} />
+              <LabelList dataKey="rv" position="top" formatter={(v) => fmt2(Number(v))} style={{ fontSize: 11, fill: "var(--tinta)" }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <Legend items={[{ color: MAIN, label: "Stuff+" }, { color: REF, label: "Resultado real (valor de carrera)" }]} />
-    </Card>
+      </div>
+      <Leyenda items={[{ color: MAIN, label: "Stuff+" }, { color: REF, label: "Resultado real (valor de carrera)" }]} />
+    </Panel>
   );
 }
 
@@ -162,63 +169,61 @@ function Ladder({ data }: { data: DashboardData }) {
       return { name: LADDER_LABEL[key] ?? l.modelo, v: l.corr_pitcher_tipo as number, final: key === "B4" };
     });
   return (
-    <Card>
-      <CardTitle sub="Correlación con el valor de carrera real en pitchers no vistos, agregando información sobre la forma del lanzamiento capa por capa.">
-        Escalera de modelos
-      </CardTitle>
-      <div className="h-64 w-full">
+    <Panel
+      ancho={12}
+      titulo="Escalera de modelos"
+      meta="Correlación con el valor de carrera real en pitchers no vistos, capa por capa"
+      pie="La altitud casi no cambia el orden de los pitchers dentro de la liga, pero se conserva porque permite valorar distinto la misma forma según la sede, que es lo que necesita el simulador."
+    >
+      <div className="pb">
+      <div className="h-56 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 0 }} barCategoryGap={8}>
             <CartesianGrid horizontal={false} stroke="var(--chart-grid)" />
-            <XAxis type="number" domain={[0, "auto"]} tick={AXIS} stroke="#d4d4d4" tickFormatter={(v: number) => fmt1(v)} />
-            <YAxis type="category" dataKey="name" width={120} tick={AXIS} stroke="#d4d4d4" />
-            <Tooltip cursor={{ fill: "#f5f5f5" }} formatter={(v) => [fmt2(Number(v)), "Correlación"]} />
+            <XAxis type="number" domain={[0, "auto"]} tick={AXIS} stroke="var(--linea)" tickFormatter={(v: number) => fmt1(v)} />
+            <YAxis type="category" dataKey="name" width={120} tick={AXIS} stroke="var(--linea)" />
+            <Tooltip cursor={{ fill: "var(--lienzo)" }} formatter={(v) => [fmt2(Number(v)), "Correlación"]} />
             <Bar dataKey="v" fill={MAIN} radius={[0, 4, 4, 0]} isAnimationActive={false}>
-              <LabelList dataKey="v" position="right" formatter={(v) => fmt2(Number(v))} style={{ fontSize: 11, fill: "#404040" }} />
+              <LabelList dataKey="v" position="right" formatter={(v) => fmt2(Number(v))} style={{ fontSize: 11, fill: "var(--tinta)" }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-3 text-xs text-neutral-500">
-        La altitud casi no cambia el orden de los pitchers dentro de la liga, pero se conserva porque permite valorar
-        distinto la misma forma según la sede, que es lo que necesita el simulador.
-      </p>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 
 function YearToYear({ data }: { data: DashboardData }) {
   const rows = data.meta.validation.year_to_year;
   return (
-    <Card>
-      <CardTitle sub="Correlación de un mismo pitcher y lanzamiento entre una temporada y la siguiente. Una métrica estable mide una habilidad, no suerte.">
-        Estabilidad año contra año
-      </CardTitle>
-      <table className="w-full text-sm">
-        <thead className="border-b border-neutral-200 text-xs text-neutral-600">
+    <Panel
+      ancho={12}
+      titulo="Estabilidad año contra año"
+      meta="Mismo pitcher y lanzamiento, de una temporada a la siguiente"
+      pie="El resultado real cambia mucho de un año a otro porque incluye ubicación, bateadores y azar; Stuff+ aísla lo que el pitcher controla con la forma de sus lanzamientos."
+    >
+      <table className="tabla">
+        <thead>
           <tr>
-            <th scope="col" className="py-2 pr-2 text-left font-medium">Temporadas</th>
-            <th scope="col" className="px-2 py-2 text-right font-medium">Pares</th>
-            <th scope="col" className="px-2 py-2 text-right font-medium text-accent">Stuff+</th>
-            <th scope="col" className="py-2 pl-2 text-right font-medium">Resultado real</th>
+            <th scope="col">Temporadas</th>
+            <th scope="col" className="n">Pares</th>
+            <th scope="col" className="n">Stuff+</th>
+            <th scope="col" className="n">Resultado real</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.par} className="border-b border-neutral-100 last:border-0">
-              <td className="py-2 pr-2 text-neutral-900">{r.par.replace("->", " → ")}</td>
-              <td className="px-2 py-2 text-right tabular-nums text-neutral-600">{fmt0(r.n)}</td>
-              <td className="px-2 py-2 text-right text-lg font-semibold tabular-nums text-neutral-900">{fmt2(r.estab_stuff)}</td>
-              <td className="py-2 pl-2 text-right tabular-nums text-neutral-700">{fmt2(r.estab_rv)}</td>
+            <tr key={r.par}>
+              <td>{r.par.replace("->", " → ")}</td>
+              <td className="n tenue">{fmt0(r.n)}</td>
+              <td className="n !text-[20px]">{fmt2(r.estab_stuff)}</td>
+              <td className="n tenue">{fmt2(r.estab_rv)}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="mt-3 text-xs text-neutral-500">
-        El resultado real cambia mucho de un año a otro porque incluye ubicación, bateadores y azar; Stuff+ aísla lo que
-        el pitcher controla con la forma de sus lanzamientos.
-      </p>
-    </Card>
+    </Panel>
   );
 }
 
@@ -229,25 +234,39 @@ function Shap({ data }: { data: DashboardData }) {
     .map(([k, v]) => ({ name: FEATURE_LABEL[k] ?? k, v }))
     .sort((a, b) => b.v - a.v);
   return (
-    <Card>
-      <CardTitle sub="Cuánto mueve en promedio cada variable la calificación de un lanzamiento, en puntos de Stuff+ (valores SHAP). IVB y HB: movimiento vertical y horizontal; Δ: diferencia contra la recta del mismo pitcher.">
-        Contribución de cada variable
-      </CardTitle>
+    <Panel
+      ancho={7}
+      titulo="Contribución de cada variable"
+      meta="Puntos de Stuff+ que mueve en promedio cada variable (SHAP); Δ: diferencia contra la recta"
+      pie="La categoría de altitud aporta sobre todo un cambio de nivel que la normalización por sede retira."
+    >
+      <div className="pb">
       <div className="h-[420px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 36, bottom: 0, left: 0 }} barCategoryGap={3}>
             <XAxis type="number" hide domain={[0, "auto"]} />
-            <YAxis type="category" dataKey="name" width={136} tick={{ fontSize: 12, fill: "#525252" }} stroke="#d4d4d4" interval={0} />
-            <Tooltip cursor={{ fill: "#f5f5f5" }} formatter={(v) => [`${fmt1(Number(v))} puntos`, "Contribución promedio"]} />
+            <YAxis type="category" dataKey="name" width={136} tick={AXIS} stroke="var(--linea)" interval={0} />
+            <Tooltip cursor={{ fill: "var(--lienzo)" }} formatter={(v) => [`${fmt1(Number(v))} puntos`, "Contribución promedio"]} />
             <Bar dataKey="v" fill={MAIN} radius={[0, 4, 4, 0]} isAnimationActive={false}>
-              <LabelList dataKey="v" position="right" formatter={(v) => fmt1(Number(v))} style={{ fontSize: 11, fill: "#404040" }} />
+              <LabelList dataKey="v" position="right" formatter={(v) => fmt1(Number(v))} style={{ fontSize: 11, fill: "var(--tinta)" }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-3 text-xs text-neutral-500">
-        La categoría de altitud aporta sobre todo un cambio de nivel que la normalización por sede retira.
-      </p>
-    </Card>
+      </div>
+    </Panel>
+  );
+}
+
+function Leyenda({ items }: { items: { color: string; label: string }[] }) {
+  return (
+    <div className="ley">
+      {items.map((i) => (
+        <span key={i.label} className="inline-flex items-center gap-1.5">
+          <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: i.color }} />
+          {i.label}
+        </span>
+      ))}
+    </div>
   );
 }
