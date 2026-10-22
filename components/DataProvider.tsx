@@ -26,19 +26,3 @@ export function DataProvider({ children }: { children: ReactNode }) {
 }
 
 export const useDashboardData = () => useContext(DataContext);
-
-/** Muestra un aviso mientras cargan los datos y entrega el contenido cuando están listos. */
-export function WithData({ children }: { children: (data: DashboardData) => ReactNode }) {
-  const state = useDashboardData();
-  if (state.status === "error") {
-    return (
-      <p className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-900">
-        No se pudieron cargar los datos del tablero: {state.message}. Recarga la página para intentar de nuevo.
-      </p>
-    );
-  }
-  if (state.status === "loading") {
-    return <p className="animate-pulse py-12 text-center text-sm text-neutral-500">Cargando datos…</p>;
-  }
-  return <>{children(state.data)}</>;
-}

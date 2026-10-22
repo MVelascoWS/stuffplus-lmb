@@ -33,8 +33,3 @@ export function ErrorDatos({ mensaje }: { mensaje: string }) {
     </p>
   );
 }
-
-/** Contenido de ancho completo sobre el lienzo, para vistas que aún no se dividen en paneles. */
-export function EnLienzo({ children }: { children: ReactNode }) {
-  return <div className="lienzo"><div className="c12 min-w-0">{children}</div></div>;
-}
