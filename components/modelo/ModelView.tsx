@@ -7,6 +7,9 @@ import { WithData } from "@/components/DataProvider";
 import { Card, CardTitle, Legend, PageIntro } from "@/components/ui";
 import type { DashboardData } from "@/lib/data";
 import { fmt0, fmt1, fmt2 } from "@/lib/format";
+import { conResultados } from "@/types/resultados";
+import { FieldMeaning } from "./FieldMeaning";
+import { ProjectionCheck } from "./ProjectionCheck";
 
 const MAIN = "#b91c1c";
 const REF = "#a8a29e";
@@ -51,6 +54,8 @@ export function ModelView() {
             </p>
           </PageIntro>
           <Steps data={data} />
+          <FieldMeaning calibration={conResultados(data.meta).calibration} />
+          <ProjectionCheck meta={conResultados(data.meta)} />
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
             <SmallSample data={data} />
             <Ladder data={data} />
