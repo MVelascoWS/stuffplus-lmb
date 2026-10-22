@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useCalculo } from "@/components/calculo/useCalculo";
 import { WithData } from "@/components/DataProvider";
 import { Card, CardTitle } from "@/components/ui";
 import {
   FASTBALL_TYPES, PITCH_TYPES, type ArsenalPitch, type DashboardData, type DashboardMeta, type FastballType,
 } from "@/lib/data";
 import { SEDE_CORTA, TIPO_CON_DEMOSTRATIVO, TIPO_LABEL, fmt0, fmt1, fmtMeters, fmtPct, fmtSigned, fmtStuff } from "@/lib/format";
-import { simulate, type PitchInput, type PitchType, type SedeKey, type SedeResult } from "@/lib/simulator";
+import { type PitchInput, type PitchType, type SedeKey, type SedeResult, type SmoothField } from "@/lib/simulator";
 import { conResultados } from "@/types/resultados";
 import { equivalencia } from "./equivalencias";
 import { LeversPanel } from "./LeversPanel";
@@ -70,13 +71,12 @@ function SimulatorView({ data, source: initialSource, notFound }: {
     initialSource ? inputFromArsenal(initialSource) : typicalInput(meta, "Four-Seam"));
   const [measuredAt, setMeasuredAt] = useState<SedeKey>(initialSource?.measuredAt ?? "No Altitude");
 
-  // El cálculo es rápido, pero diferirlo mantiene fluidos los controles deslizantes en celulares.
-  const deferredInput = useDeferredValue(input);
-  const deferredAt = useDeferredValue(measuredAt);
-  const results = useMemo(
-    () => simulate(model, meta, deferredInput, deferredAt),
-    [model, meta, deferredInput, deferredAt],
-  );
+  // El modelo corre en un worker: los controles responden aunque el cálculo tarde en un celular.
+  const ctx = useMemo(() => ({ model, meta }), [model, meta]);
+  const calculo = useCalculo({ kind: "simulate", input, measuredAt }, ctx);
+  const results = calculo.valor!;
+  // Lo que acompaña a los resultados describe el lanzamiento que los produjo.
+  const calculado = calculo.trabajo.input;
 
   const set = <K extends keyof PitchInput>(k: K) => (v: PitchInput[K]) => setInput((s) => ({ ...s, [k]: v }));
   const r = meta.ranges;
@@ -182,7 +182,7 @@ function SimulatorView({ data, source: initialSource, notFound }: {
         </div>
 
         <div className="min-w-0 space-y-6">
-          <Interpretation results={results} tipo={deferredInput.tipo} meta={meta} />
+          <Interpretation results={results} tipo={calculado.tipo} meta={meta} />
           <div className="grid gap-4 sm:grid-cols-3">
             {results.map((res) => (
               <ResultCard key={res.sede} r={res} base={results[0]} meta={meta} />
@@ -194,7 +194,7 @@ function SimulatorView({ data, source: initialSource, notFound }: {
             </CardTitle>
             <MovementChart results={results} />
           </Card>
-          <LeversPanel meta={conResultados(meta)} tipo={deferredInput.tipo} />
+          <LeversPanel meta={conResultados(meta)} tipo={input.tipo} />
           <Method meta={meta} />
         </div>
       </div>
@@ -284,6 +284,19 @@ function Interpretation({ results, tipo, meta }: { results: SedeResult[]; tipo: 
   );
 }
 
+/** Variables del lanzamiento cuya variación se describe (la recta usa las mismas magnitudes). */
+const VARIACION: [SmoothField, string, string, number][] = [
+  ["RelSpeed", "velocidad", "mph", 1],
+  ["ivb", "movimiento vertical", "in", 1],
+  ["hb_arm", "movimiento horizontal", "in", 1],
+  ["SpinRate", "giro", "rpm", 0],
+  ["spin_axis_m", "eje", "°", 0],
+  ["Extension", "extensión", "ft", 2],
+  ["RelHeight", "altura de liberación", "ft", 2],
+  ["rel_side_arm", "lado de liberación", "ft", 2],
+];
+const nf = (v: number, d: number) => v.toLocaleString("es-MX", { minimumFractionDigits: d, maximumFractionDigits: d });
+
 function Method({ meta }: { meta: DashboardMeta }) {
   const { sigma, offsets } = meta.smoothing;
   return (
@@ -300,8 +313,9 @@ function Method({ meta }: { meta: DashboardMeta }) {
         </li>
         <li>
           El modelo lo califica con la categoría de altitud de la sede. La predicción se promedia sobre {offsets.length}{" "}
-          variaciones de ejecución (±{fmt1(sigma.RelSpeed)} mph, ±{fmt1(sigma.ivb)} in de movimiento), para que no
-          dependa de un solo umbral del modelo.
+          variaciones de ejecución del lanzamiento y de la recta, de la mitad de la variación natural de cada variable:{" "}
+          {VARIACION.map(([campo, nombre, unidad, d]) => `±${nf(sigma[campo], d)} ${unidad} de ${nombre}`).join(", ")}.
+          Así un cambio de una décima no mueve la calificación por un umbral del modelo.
         </li>
         <li>Stuff+ se escala con la media y la desviación estándar de esa categoría de altitud.</li>
       </ol>

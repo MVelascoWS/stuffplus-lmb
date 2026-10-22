@@ -1,12 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useCalculo } from "@/components/calculo/useCalculo";
 import { WithData } from "@/components/DataProvider";
 import { Card } from "@/components/ui";
-import { decodeArsenal, encodeArsenal, evaluateArsenal, type ArsenalInput } from "@/lib/arsenal";
+import { decodeArsenal, encodeArsenal, type ArsenalInput } from "@/lib/arsenal";
 import type { DashboardData } from "@/lib/data";
-import { SEDE_CORTA, fmt0, fmtSigned, fmtStuff } from "@/lib/format";
+import { SEDE_CORTA, fmt0, fmtStuff } from "@/lib/format";
 import { conResultados } from "@/types/resultados";
 import { ArsenalEditor } from "./ArsenalEditor";
 import { ArsenalResultView } from "./ArsenalResultView";
@@ -69,7 +70,6 @@ function query(draft: Draft, origen: string | null, comparados: Comparado[]): st
 
 function Evaluador({ data, extra, params }: { data: DashboardData; extra: CandidatosData; params: URLSearchParams }) {
   const meta = useMemo(() => conResultados(data.meta), [data.meta]);
-  const metaRef = useMemo(() => ({ ...data.meta, arsenal_ref: extra.arsenalRef }), [data.meta, extra.arsenalRef]);
   const uso = useMemo(() => usoTipico(data.arsenal), [data.arsenal]);
   const [inicial] = useState(() => desdeUrl(params, data, uso));
   const [draft, setDraft] = useState<Draft>(inicial.draft);
@@ -77,12 +77,11 @@ function Evaluador({ data, extra, params }: { data: DashboardData; extra: Candid
   const [comparados, setComparados] = useState<Comparado[]>(inicial.comparados);
   const [copiado, setCopiado] = useState(false);
 
-  const deferred = useDeferredValue(draft);
-  const result = useMemo(() => evaluateArsenal(data.model, metaRef, toInput(deferred)), [data.model, metaRef, deferred]);
-  const compResults = useMemo(
-    () => comparados.map((c) => evaluateArsenal(data.model, metaRef, c.input)),
-    [data.model, metaRef, comparados],
-  );
+  // Los arsenales se califican en un worker: editar no bloquea la página aunque haya tres en comparación.
+  const ctx = useMemo(() => ({ model: data.model, meta: data.meta, ref: extra.arsenalRef }), [data.model, data.meta, extra.arsenalRef]);
+  const actual = useMemo(() => toInput(draft), [draft]);
+  const result = useCalculo({ kind: "arsenal", inputs: [actual] }, ctx).valor![0];
+  const comparacion = useCalculo({ kind: "arsenal", inputs: comparados.map((c) => c.input) }, ctx, false);
   const minN = useMemo(() => Math.min(...data.pitchers.map((p) => p.n)), [data.pitchers]);
   const ids = useMemo(() => data.pitchers.map((p) => p.pitcher_anon_id).sort(), [data.pitchers]);
 
@@ -93,14 +92,6 @@ function Evaluador({ data, extra, params }: { data: DashboardData; extra: Candid
     }, 300);
     return () => clearTimeout(t);
   }, [draft, origen, comparados]);
-
-  // Un pitcher de la liga editado conserva todos sus decimales, pero el link guarda uno: se avisa si eso
-  // cambia la calificación que vería quien abra el link.
-  const desvioLink = useMemo(() => {
-    if (origen) return 0;
-    const back = decodeArsenal(encodeArsenal(toInput(deferred)));
-    return back ? evaluateArsenal(data.model, metaRef, back).stuff["Harp Helu"] - result.stuff["Harp Helu"] : 0;
-  }, [origen, deferred, data.model, metaRef, result]);
 
   const edit = (d: Draft) => { setDraft(d); setOrigen(null); setCopiado(false); };
   const cargarPitcher = (id: string) => {
@@ -157,20 +148,17 @@ function Evaluador({ data, extra, params }: { data: DashboardData; extra: Candid
         </div>
       </div>
 
-      {Math.round(desvioLink) !== 0 && (
-        <p className="-mt-3 mb-6 text-xs text-neutral-600">
-          El link guarda los valores con un decimal; con este arsenal, quien lo abra verá {fmtSigned(desvioLink)} puntos
-          de Stuff+ en el Harp Helú respecto a lo que ves aquí.
-        </p>
-      )}
-
       <ArsenalEditor draft={draft} meta={data.meta} usoTipico={uso} onChange={edit} />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
         <ArsenalResultView result={result} meta={meta} minN={minN} />
         <div className="min-w-0 space-y-6">
           {comparados.length > 0 ? (
-            <Comparison items={comparados} results={compResults} onRemove={quitar} onEdit={editarComparado} />
+            comparacion.valor && !comparacion.calculando ? (
+              <Comparison items={comparados} results={comparacion.valor} onRemove={quitar} onEdit={editarComparado} />
+            ) : (
+              <Card><p className="animate-pulse text-sm text-neutral-500">Calculando la comparación…</p></Card>
+            )
           ) : (
             <Card>
               <p className="text-sm text-neutral-600">

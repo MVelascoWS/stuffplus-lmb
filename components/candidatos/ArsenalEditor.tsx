@@ -5,12 +5,12 @@ import { Card, CardTitle } from "@/components/ui";
 import { PITCH_TYPES, type DashboardMeta } from "@/lib/data";
 import { MANO_LABEL, SEDE_CORTA, TIPO_LABEL, fmt1 } from "@/lib/format";
 import type { PitchType, SedeKey } from "@/lib/simulator";
-import { MAX_PITCHES, MIN_PITCHES, nuevoPitch, pitchTipico, r1, type Draft, type DraftPitch } from "./draft";
+import { DECIMALES as D, MAX_PITCHES, MIN_PITCHES, nuevoPitch, pitchTipico, redondear, type Draft, type DraftPitch } from "./draft";
 
 const MEASURED_AT: SedeKey[] = ["No Altitude", "Medium Altitude", "Extreme Altitude", "Harp Helu"];
 
-function Num({ label, unit, value, step, onChange }: {
-  label: string; unit?: string; value: number; step: number; onChange: (v: number) => void;
+function Num({ label, unit, value, digits, onChange }: {
+  label: string; unit?: string; value: number; digits: number; onChange: (v: number) => void;
 }) {
   const id = useId();
   return (
@@ -19,12 +19,12 @@ function Num({ label, unit, value, step, onChange }: {
       <input
         id={id}
         type="number"
-        step={step}
-        value={Number(value.toFixed(step < 1 ? 1 : 0))}
+        step={10 ** -digits}
+        value={redondear(value, digits)}
         onChange={(e) => {
           const v = e.target.valueAsNumber;
-          // Misma precisión que muestra el campo (y que guarda el link).
-          if (Number.isFinite(v)) onChange(step < 1 ? r1(v) : Math.round(v));
+          // Misma precisión que muestra el campo y que guarda el link.
+          if (Number.isFinite(v)) onChange(redondear(v, digits));
         }}
         className="mt-0.5 block w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm tabular-nums text-neutral-900 focus:border-accent focus:outline-none"
       />
@@ -92,9 +92,9 @@ export function ArsenalEditor({ draft, meta, usoTipico, onChange }: Props) {
           options={MEASURED_AT.map((k) => ({ value: k, label: SEDE_CORTA[k] }))}
           onChange={(v) => set("measuredAt", v as SedeKey)}
         />
-        <Num label="Extensión" unit="ft" step={0.1} value={draft.Extension} onChange={(v) => set("Extension", v)} />
-        <Num label="Altura de liberación" unit="ft" step={0.1} value={draft.RelHeight} onChange={(v) => set("RelHeight", v)} />
-        <Num label="Lado de liberación" unit="ft" step={0.1} value={draft.rel_side_arm} onChange={(v) => set("rel_side_arm", v)} />
+        <Num label="Extensión" unit="ft" digits={D.liberacion} value={draft.Extension} onChange={(v) => set("Extension", v)} />
+        <Num label="Altura de liberación" unit="ft" digits={D.liberacion} value={draft.RelHeight} onChange={(v) => set("RelHeight", v)} />
+        <Num label="Lado de liberación" unit="ft" digits={D.liberacion} value={draft.rel_side_arm} onChange={(v) => set("rel_side_arm", v)} />
       </div>
 
       <h3 className="mt-6 text-sm font-semibold text-neutral-900">Lanzamientos</h3>
@@ -124,12 +124,12 @@ export function ArsenalEditor({ draft, meta, usoTipico, onChange }: Props) {
                   onChange={(v) => changeTipo(p, v as PitchType)}
                 />
               </div>
-              <Num label="Uso" unit="%" step={0.1} value={p.uso} onChange={(v) => setPitch(p.id, { uso: v })} />
-              <Num label="Velocidad" unit="mph" step={0.1} value={p.RelSpeed} onChange={(v) => setPitch(p.id, { RelSpeed: v })} />
-              <Num label="IVB" unit="in" step={0.1} value={p.ivb} onChange={(v) => setPitch(p.id, { ivb: v })} />
-              <Num label="HB" unit="in" step={0.1} value={p.hb_arm} onChange={(v) => setPitch(p.id, { hb_arm: v })} />
-              <Num label="Giro" unit="rpm" step={10} value={p.SpinRate} onChange={(v) => setPitch(p.id, { SpinRate: v })} />
-              <Num label="Eje" unit="°" step={1} value={p.spin_axis_m} onChange={(v) => setPitch(p.id, { spin_axis_m: v })} />
+              <Num label="Uso" unit="%" digits={D.uso} value={p.uso} onChange={(v) => setPitch(p.id, { uso: v })} />
+              <Num label="Velocidad" unit="mph" digits={D.velocidad} value={p.RelSpeed} onChange={(v) => setPitch(p.id, { RelSpeed: v })} />
+              <Num label="IVB" unit="in" digits={D.movimiento} value={p.ivb} onChange={(v) => setPitch(p.id, { ivb: v })} />
+              <Num label="HB" unit="in" digits={D.movimiento} value={p.hb_arm} onChange={(v) => setPitch(p.id, { hb_arm: v })} />
+              <Num label="Giro" unit="rpm" digits={D.giro} value={p.SpinRate} onChange={(v) => setPitch(p.id, { SpinRate: v })} />
+              <Num label="Eje" unit="°" digits={D.eje} value={p.spin_axis_m} onChange={(v) => setPitch(p.id, { spin_axis_m: v })} />
             </div>
           </li>
         ))}

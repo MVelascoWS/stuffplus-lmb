@@ -12,10 +12,12 @@ export type DraftPitch = ArsenalPitch & { id: number };
 export type Draft = Omit<ArsenalInput, "pitches"> & { pitches: DraftPitch[] };
 
 /**
- * El link para compartir guarda un decimal (giro y eje, enteros). Los valores que se capturan o precargan se
- * guardan con esa misma precisión, para que el link reproduzca exactamente la calificación que se ve.
+ * Precisión de lo que se captura, la misma que guarda el link (encodeArsenal): dos decimales en velocidad,
+ * movimiento y liberación, uno en el uso, y giro y eje enteros.
  */
-export const r1 = (x: number) => Math.round(x * 10) / 10;
+export const DECIMALES = { velocidad: 2, movimiento: 2, liberacion: 2, uso: 1, giro: 0, eje: 0 } as const;
+export const redondear = (x: number, d: number) => Math.round(x * 10 ** d) / 10 ** d;
+const D = DECIMALES;
 
 let nextId = 1;
 export const withIds = (a: ArsenalInput): Draft => ({ ...a, pitches: a.pitches.map((p) => ({ ...p, id: nextId++ })) });
@@ -31,8 +33,9 @@ export function usoTipico(arsenal: ArsenalJsonRow[]): Record<PitchType, number> 
 export function pitchTipico(meta: DashboardMeta, tipo: PitchType, uso: number): ArsenalPitch {
   const d = meta.defaults[tipo];
   return {
-    tipo, uso: r1(uso), RelSpeed: r1(d.RelSpeed), ivb: r1(d.ivb), hb_arm: r1(d.hb_arm),
-    SpinRate: Math.round(d.SpinRate), spin_axis_m: Math.round(d.spin_axis_m),
+    tipo, uso: redondear(uso, D.uso), RelSpeed: redondear(d.RelSpeed, D.velocidad),
+    ivb: redondear(d.ivb, D.movimiento), hb_arm: redondear(d.hb_arm, D.movimiento),
+    SpinRate: redondear(d.SpinRate, D.giro), spin_axis_m: redondear(d.spin_axis_m, D.eje),
   };
 }
 
@@ -53,9 +56,9 @@ export function ejemplo(meta: DashboardMeta, uso: Record<PitchType, number>): Dr
   return withIds({
     mano: "Right",
     measuredAt: "No Altitude",
-    Extension: r1(rel.Extension),
-    RelHeight: r1(rel.RelHeight),
-    rel_side_arm: r1(rel.rel_side_arm),
+    Extension: redondear(rel.Extension, D.liberacion),
+    RelHeight: redondear(rel.RelHeight, D.liberacion),
+    rel_side_arm: redondear(rel.rel_side_arm, D.liberacion),
     pitches: tipos.map((t, i) => pitchTipico(meta, t, pcts[i])),
   });
 }
