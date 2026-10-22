@@ -7,9 +7,11 @@ import { WithData } from "@/components/DataProvider";
 import { Card, CardTitle, Legend, PageIntro } from "@/components/ui";
 import type { DashboardData } from "@/lib/data";
 import { fmt0, fmt1, fmt2 } from "@/lib/format";
+import { conConvocatoria } from "@/types/convocatoria";
 import { conResultados } from "@/types/resultados";
 import { FieldMeaning } from "./FieldMeaning";
 import { ProjectionCheck } from "./ProjectionCheck";
+import { Validaciones } from "./Validaciones";
 
 const MAIN = "#b91c1c";
 const REF = "#a8a29e";
@@ -56,11 +58,12 @@ export function ModelView() {
           <Steps data={data} />
           <FieldMeaning calibration={conResultados(data.meta).calibration} />
           <ProjectionCheck meta={conResultados(data.meta)} />
+          <Validaciones meta={conConvocatoria(data.meta)} />
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
             <SmallSample data={data} />
             <Ladder data={data} />
             <YearToYear data={data} />
-            <Importance data={data} />
+            <Shap data={data} />
           </div>
         </>
       )}
@@ -219,27 +222,32 @@ function YearToYear({ data }: { data: DashboardData }) {
   );
 }
 
-function Importance({ data }: { data: DashboardData }) {
-  const rows = Object.entries(data.meta.validation.importance)
+/** Contribución de cada variable a la calificación (SHAP), sin la categoría de altitud. */
+function Shap({ data }: { data: DashboardData }) {
+  const rows = Object.entries(conConvocatoria(data.meta).robustez.shap.global)
+    .filter(([k]) => k !== "alt")
     .map(([k, v]) => ({ name: FEATURE_LABEL[k] ?? k, v }))
     .sort((a, b) => b.v - a.v);
   return (
     <Card>
-      <CardTitle sub="Porcentaje de la mejora total del modelo que aporta cada variable. IVB y HB: movimiento vertical y horizontal; Δ: diferencia contra la recta del mismo pitcher.">
-        Importancia de variables
+      <CardTitle sub="Cuánto mueve en promedio cada variable la calificación de un lanzamiento, en puntos de Stuff+ (valores SHAP). IVB y HB: movimiento vertical y horizontal; Δ: diferencia contra la recta del mismo pitcher.">
+        Contribución de cada variable
       </CardTitle>
-      <div className="h-[440px] w-full">
+      <div className="h-[420px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 36, bottom: 0, left: 0 }} barCategoryGap={3}>
             <XAxis type="number" hide domain={[0, "auto"]} />
             <YAxis type="category" dataKey="name" width={136} tick={{ fontSize: 12, fill: "#525252" }} stroke="#d4d4d4" interval={0} />
-            <Tooltip cursor={{ fill: "#f5f5f5" }} formatter={(v) => [`${fmt1(Number(v))}%`, "Importancia"]} />
+            <Tooltip cursor={{ fill: "#f5f5f5" }} formatter={(v) => [`${fmt1(Number(v))} puntos`, "Contribución promedio"]} />
             <Bar dataKey="v" fill={MAIN} radius={[0, 4, 4, 0]} isAnimationActive={false}>
-              <LabelList dataKey="v" position="right" formatter={(v) => `${fmt1(Number(v))}%`} style={{ fontSize: 11, fill: "#404040" }} />
+              <LabelList dataKey="v" position="right" formatter={(v) => fmt1(Number(v))} style={{ fontSize: 11, fill: "#404040" }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
+      <p className="mt-3 text-xs text-neutral-500">
+        La categoría de altitud aporta sobre todo un cambio de nivel que la normalización por sede retira.
+      </p>
     </Card>
   );
 }
