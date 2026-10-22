@@ -87,4 +87,4 @@ pipeline, colocar el archivo en `data/stuff_model_df.parquet`.
 
 ## Equipo
 
-[NOMBRES DEL EQUIPO]
+Regina Martinez Velasco y Michael Velasco Velasco
