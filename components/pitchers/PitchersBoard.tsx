@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Fragment, useMemo, useState } from "react";
 import { WithData } from "@/components/DataProvider";
+import { PROJECTION_ANCHOR } from "@/components/modelo/ProjectionCheck";
 import { PageIntro } from "@/components/ui";
 import type { ArsenalPitch, DashboardData, Pitcher } from "@/lib/data";
 import { MANO_LABEL, TIPO_LABEL, fmt0, fmt1, fmtSigned, fmtStuff } from "@/lib/format";
+import { conResultados } from "@/types/resultados";
 
 type SortKey = "pitcher_anon_id" | "mano" | "n" | "stuff" | "stuff_mar" | "stuff_media" | "stuff_extrema" | "stuff_cdmx_proy" | "delta_cdmx_proy";
 type Mano = "all" | "Right" | "Left";
@@ -87,6 +89,14 @@ function Board({ data, initial }: { data: DashboardData; initial: string | null 
         <p>
           La columna Δ es lo que gana o pierde cada pitcher frente a su Stuff+ a nivel del mar. Toca un pitcher para ver
           su arsenal y abrir cualquier lanzamiento en el simulador.
+        </p>
+        <p className="text-sm text-neutral-600">
+          <span className="font-medium text-neutral-900">Proyección validada:</span> con pitchers que el modelo no vio,
+          anticipa su Stuff+ en altitud con {fmt0(conResultados(data.meta).projection_validation.reduccion_error_pct)}% menos
+          error que suponer que rinden igual.{" "}
+          <Link href={`/modelo/#${PROJECTION_ANCHOR}`} className="whitespace-nowrap text-accent underline-offset-2 hover:underline">
+            Ver la validación →
+          </Link>
         </p>
       </PageIntro>
 
